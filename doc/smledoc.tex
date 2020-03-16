@@ -10,59 +10,94 @@
 \title{Computer programs for simulation-based estimation of peer effects}
 \author{Brian Krauth \\
 	Simon Fraser University}
-\date{Version 1.1 - March 1, 2005}
+\date{Version 2.0 - (RELEASE DATE???)}
 	
 \maketitle
 
-\section{Description of programs}
-
-This file is the documentation for a set of Fortran 90 computer programs
+This file is the documentation for a set of computer programs
 I have written to implement the structural estimation method
 described in my paper ``Simulation-based estimation of peer effects'' \cite{smle}.
-References in this documentation refer to the July 30, 2004 draft of the paper.  
 
-The main programs in the distribution are:
+\section{Installation and use}
+
+\subsection{Installation}
+
+To install the programs, simply unzip the file {\tt smle.zip} into a directory of your choice.  
+This will create 4 subdirectories:
 \begin{itemize}
-\item {\tt smle:} Estimates structural model from an individual-based sample.
-\item {\tt s2:} Estimates structural model from a group-based sample.
-\item {\tt probit:} Estimates a standard (naive) probit model from an individual-based or group-based
-	sample.
-\item {\tt psim:} Generates simulated data from the model for use in Monte Carlo experiments.
+	\item {\tt windows-binaries}: contains Windows executable files.  
+		There are two estimation programs:
+		\begin{itemize}
+			\item {\tt smle.exe:} Estimates structural model from an individual-based sample.
+			\item {\tt s2.exe:} Estimates structural model from a group-based sample.
+		\end{itemize}
+		and two support programs:
+		\begin{itemize}
+			\item {\tt probit.exe:} Estimates a standard (naive) probit model from an individual-based or group-based
+			sample.
+			\item {\tt psim.exe:} Generates simulated data from the model for use in Monte Carlo experiments.
+		\end{itemize}
+		All four of these programs are self-contained, and can be copied to and run
+		from any directory.
+	\item {\tt doc}: contains documentation, including this file.
+	\item {\tt examples}: contains examples.
+	\item {\tt code}: contains the source code.
 \end{itemize}
-This distribution\footnote{An older version of the code is available for Gauss; however many features and options
-available in the Fortran version are not in the Gauss version.  Email me to ask for 
-a copy.} provides both Fortran 90 source code and executable programs for Windows.
 
-\section{Installation and basic use}
+\subsection{Basic use}
 
-To install, create a directory on your computer for the code and programs, then
-unzip the file {\tt smle.zip} into that directory.  Once that is done, there are two options.  
-\begin{enumerate}
-\item The distribution provides (in the {\tt windows-binaries} directory) executable files 
-  for Windows.  They can be copied to any working directory and used there.
-\item If you have a Fortran 90 compiler, the source code can be compiled 
-	directly.  This allows for use under Linux and other operating systems,
-	and allows for the modification of code when needed.  See Appendix~\ref{sec:compiling}
-	for details.
-\end{enumerate}
-To use any of the programs, just do the following:
-\begin{enumerate}
-\item Copy the executable to your work directory (i.e., the 
-	directory in which you want to put your input and output).
-\item Create a parameter file in the work directory.  The parameter file
-	specifies user settings for various options.
-\item Construct the data file	and place in the work directory. 
-\item Run the program.  Note that depending on the size of the data set and the
-	user options selected, the execution time of {\tt smle} and {\tt s2} can vary 
-	from minutes to weeks.  
-\item The estimation results will be reported in a user-specified file.
-\end{enumerate}
-The structure of the data file, parameter file, and output files varies by program.
-See below for details.
+To use any of the programs, you first need to create two input files:
+\begin{itemize}
+	\item A {\it data} file, i.e., a text file containing the 
+		data set from which you are estimating the model.
+	\item A {\it parameter} file, i.e., a text file describing
+		your preferred settings for the various user options.  
+\end{itemize}
+The format of the data and parameter files varies across the 4 programs.
+Details on how to construct these files can be found in Sections \ref{sec:smle}-\ref{sec:psim}.
+
+Once you have created the data and parameter files, place the program you wish
+to use in the same directory, open a Windows command prompt in that directory
+and execute the command \\
+\begin{center}
+{\tt program-name parameter-file-name}
+\end{center}
+where
+{\tt program-name} is the name of the program (either {\tt smle}, {\tt s2},
+{\tt probit}, or {\tt psim}) and {\tt parameter-file-name} is the name\footnote{Note that
+in previous versions, the programs did not take any arguments, and the parameter file 
+had to be named {\tt parm.dat}.} of the parameter file you have created.
+
+The program will run for anywhere from a few minutes to a few weeks,
+depending on the size of your dataset and the options selected.
+While running it will create several output files, including 
+a log file and a file of results.
+
+{\bf Example:} Suppose you have installed the program into
+the directory {\tt c:/my-directory/}.  Open the Windows
+command prompt and execute the following sequence of 
+commands:
+\begin{verbatim}
+cd \my-directory\examples\smle
+copy \my-directory\windows-binaries\smle.exe .
+smle example1.txt
+\end{verbatim}
+This will run the {\tt smle} program with the example parameter file
+{\tt example1.txt}.  It will run for a few minutes and 
+create output files {\tt ex1\_log.txt} and {\tt ex1\_results.txt}.
+The contents of both the parameter file and the output files
+will be discussed in Section \ref{sec:smle}.
+
+\subsection{Advanced use}
+
+If you have a modern Fortran compiler (i.e., one that can compile Fortran 90/95), 
+the source code can be compiled directly.  This allows for use under Linux and other 
+operating systems, and allows for the modification of code when needed.  
+See Appendix~\ref{sec:compiling} for details.
 
 \section{Using the {\tt smle} program }\label{sec:smle}
 
-The {\tt smle} or {\tt smle.exe} program is used to estimate the structural model 
+The {\tt smle.exe} program is used to estimate the structural model 
 described in the paper from an individual-based sample.  
 
 \subsection{Data file}
@@ -71,45 +106,145 @@ The program expects data in whitespace-delimited ASCII format, with
 no headers.  Each row should contain a single observation,
 consisting of the following columns:
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c p{0in}|}
 \hline
-{\footnotesize {\bf Column \# }} & {\footnotesize 1} & {\footnotesize 2} & {\footnotesize 3} & {\footnotesize 4+} \\ 
+{\footnotesize {\bf Column \# }} & {\footnotesize 1} & {\footnotesize 2} & {\footnotesize 3} & \multicolumn{2}{c}{\footnotesize 4+}  & \\ 
 \hline
-{\footnotesize {\bf Variable }} & {\footnotesize Respondent's} & {\footnotesize Average} & {\footnotesize Number} & {\footnotesize Other} \\
-                & {\footnotesize Choice}       & {\footnotesize Peer}    & {\footnotesize of}     & {\footnotesize Explanatory}  \\
-				        &              & {\footnotesize Choice}  & {\footnotesize Peers}  & {\footnotesize Variables} \\
+{\footnotesize {\bf Variable }} & {\footnotesize Respondent's} & {\footnotesize Average} & {\footnotesize Number} & {\footnotesize Aggregate} & {\footnotesize Individual}  & \\
+                & {\footnotesize Own}       & {\footnotesize Peer}    & {\footnotesize of}     & {\footnotesize Explanatory}  & {\footnotesize Explanatory} & \\
+				        & {\footnotesize Choice}  & {\footnotesize Choice}  & {\footnotesize Peers}  & {\footnotesize Variables} & {\footnotesize Variables} & \\
+ & ($y_{gi}$) & ($\bar{y}_{gi}$) & ($n_g-1$) & (${\bf z}_g$) & (${\bf x}_{gi}$) & \\
 \hline
-{\footnotesize {\bf Range }} & {\footnotesize $\{0,1\}$} & {\footnotesize $[0.0,1.0]$} & {\footnotesize $\{1,2,3,\ldots\}$} & {\footnotesize $(-\infty,\infty)$} \\
+{\footnotesize {\bf Range }} & {\footnotesize $\{0,1\}$} & {\footnotesize $[0.0,1.0]$} & {\footnotesize $\{1,2,3,\ldots\}$} & {\footnotesize $(-\infty,\infty)$} & {\footnotesize $(-\infty,\infty)$} & \\
 \hline
 \end{tabular}
 \end{center}
-If you intend to treat some of the explanatory variables as aggregates, put them 
-before the other explanatory variables.
+These variables are as described in the paper.
 
-For example, a data set with 2 explanatory variables and 3 observations might
-look like this:
+
+\vspace{0.1in}
+
+\noindent{\bf Example}: The first three rows in the example data 
+set {\tt examples/ex1\_data.txt} look like this:
 {\scriptsize
 \begin{verbatim}
-1 1.000 4 -0.337  0.000
-0 0.250 4 -1.734  1.000
-0 0.400 5  0.532  0.000
+1	0.25 4 0.28822476
+0	1.00 4 0.084842203
+0	0.75 4 0.16752506
 \end{verbatim}
 }
-
+This data set features a single explanatory variable.  
+For the first observation, we have $y_{gi}=1$, $\bar{y}_{gi}=0.25$, $(n_g-1)=4$ (so that $n_g=5$),
+and $x_{gi}=0.28822476$.
 
 \subsection{Parameter file and user options}
 
-The parameter file for the {\tt smle} program is named {\tt parm.dat}.
-and is just a text file with a set of user options specified.  
-It looks like this:
+The parameter file for the {\tt smle} program is just a text file 
+specifying your preferred settings for various user options.  
 
+The program is very primitive in how it reads this file.  In 
+particular it looks on specific lines of the file for specific 
+variables.  For example, it will always set {\tt DATAFILE} to whatever is in the 
+33rd line in the file.  The first four lines and any even numbered
+lines are ignored, so they can be used for any comments one might want.
+When creating your own parameter file, it is best to start with
+an example parameter file from the {\tt examples} directory, and then
+edit the file as needed for your application.
+The contents of a properly-constructed parameter file are
+listed below:
+
+\begin{description}
+\item[Line 5] ({\tt NVAR}): Number of exogenous explanatory variables (both group-level and individual-level)
+	in data set (integer).
+\item[Line 7] ({\tt NOBS}): Number of observations in data set (integer).
+\item[Line 9] ({\tt NUMAGG}): The first {\tt NUMAGG} explanatory variables in the data set will be treated 
+	as aggregate (i.e., group-level) variables (integer).  Group-level explanatory variables
+	are treated differently in the model from individual-level explanatory variables.  See Section 4.4 in 
+	the paper for details.  Note that the estimation method requires at least one individual-level 
+	variable, so {\tt NUMAGG} must be strictly less than {\tt NVAR}.
+\item[Line 11] ({\tt NSIM}): Number of simulations to use in calculating the log-likelihood function (integer).
+	The program uses randomized Halton sequences, which accurately approximate probabilities using
+	far fewer simulations than standard random numbers.  About {\tt NSIM=100} seems to work well enough 
+	for a first pass.  One way to see if your value of {\tt NSIM} is big enough is to estimate the
+	model several times and see if the parameter estimates change substantially.  If they do,
+	then {\tt NSIM} is not big enough.
+\item[Line 13] ({\tt RESTARTS}): Number of times to run the Davidson-Fletcher-Powell (DFP) search algorithm (integer).  
+	At least {\tt RESTARTS=3} is recommended to avoid finding a local rather than global optimum.   
+	If {\tt RESTARTS=0}, the simulated annealing (SA) search algorithm will be used instead of DFP.  Simulated
+	annealing is usually much slower than DFP but is more robust in solving optimization problems
+	with lots of local optima.
+\item[Line 15] ({\tt SIMULATOR\_{}TYPE}): Type of simulator to use in calculating normal rectangle probabilities.
+	Options include (program ignores all but the first letter, not case sensitive)
+	\begin{itemize}
+		\item {\tt G(HK)}: Geweke-Hajivassiliou-Keane simulator.  A slower but more accurate simulator that 
+			is currently only available in combination  with {\tt EQUILIBRIUM\_{}TYPE=L}.
+		\item {\tt H(ybrid)}: GHK-CFS hybrid simulator.  A faster and more flexible simulator, but generates
+			a discontinuous approximate likelihood function.  It is recommended that the simulated annealing
+			search algorithm be used if {\tt SIMULATOR\_{}TYPE = HYBRID}.
+	\end{itemize}
+	The GHK simulator and DFP search algorithm is the recommended combination, when available.
+\item[Line 17] ({\tt EQUILIBRIUM\_{}TYPE}): Equilibrium selection rule assumed (character). See Sections
+	2.3 and 4.2 in the paper for details.   Options include (program ignores all but 
+	the first letter, not case sensitive):
+	\begin{itemize}
+		\item {\tt L(ow)}: Low-activity equilibrium
+		\item {\tt H(igh)}: High-activity equilibrium
+		\item {\tt R(andom)}: Random equilibrium
+		\item {\tt B(ounds)}: Find selection-rule-free bounds (upper and lower) on $\gamma$ using 
+			the likelihood bounds	method, as described in Section 4.2 of the paper.
+		\item {\tt P(lot)}: Calculate selection-rule-free bounds on the likelihood function for 
+			plotting (as in Figure 2 of the paper).
+		\item {\tt M(inumum)}: Find selection-rule-free bounds (lower bound only) 
+			on $\gamma$ using the likelihood bounds	method.
+	\end{itemize}
+\item[Line 19] ({\tt UNDERREPORTING\_{}CORRECTION}): Indicates whether or not to correct for underreporting (logical).  	See Section 4.3 in the paper for details.
+\item[Line 21] ({\tt BOOTSTRAP}): Indicates whether to estimate the model once from the original sample 
+	({\tt BOOTSTRAP = .FALSE.}) or 100 times from a series of bootstrap resamples ({\tt BOOTSTRAP = .TRUE.}).
+\item[Line 23] ({\tt LOAD\_{}U}): Indicates whether to use the internal random number generator to produce 
+	random numbers, or to load from the file specified as {\tt UFILE} (logical).  
+\item[Line 25] ({\tt RHO\_{}TYPE}): Rule for treating the within-group correlation in unobservables $\rho_{\epsilon}$
+	See Sections 2.4 and 4.1 in the paper for details. Options include:
+	\begin{itemize}
+		\item {\tt X} (recommended): Assume $\rho_{\epsilon}=\rho_x$.  This is the baseline
+			restriction in the paper.
+		\item {\tt F(ixed)}: Fix $\rho_{\epsilon}$ at the value of {\tt FIXED\_RHO} specified in line 27.
+		\item {\tt E(stimate)}: Estimate $\rho_{\epsilon}$ directly (not recommended if {\tt FIX\_GAMMA=.true.}).
+		\item {\tt I(nterval)}: Estimate $\hat{\gamma}(\rho_{\epsilon})$ function described in Section 4.1 of
+			the paper.
+	\end{itemize}
+\item[Line 27] ({\tt FIXED\_RHO}): Value at which to fix $\rho_{\epsilon}$.  Ignored if {\tt RHO\_TYPE $\neq$ FIXED}.
+\item[Line 29] ({\tt FIX\_GAMMA}): Indicates whether the value of $\gamma$ should be fixed rather than estimated (logical).
+	See section 2.4 in the paper for details.
+\item[Line 31] ({\tt FIXED\_GAMMA}): Value at which to fix $\gamma$ (real).  Ignored if {\tt FIX\_GAMMA = .false.}.
+\item[Line 33] ({\tt DATAFILE}): Name of file from which data will be read.
+\item[Line 35] ({\tt LOGFILE}): Name of file to which log data will be written.
+	File will be overwritten.
+\item[Line 37] ({\tt RESULTFILE}): Name of file to which estimation results will be written.  Results
+	will be appended to file.
+\item[Line 39] ({\tt UFILE}): Name of file in which random numbers are stored.  
+	If {\tt LOAD\_U = .TRUE.}, then the random numbers will be read from this file.  If 
+	{\tt LOAD\_U = .FALSE.}, then the random numbers will be written to this file.
+\item[Line 41] ({\tt BOOTFILE}): Same as {\tt UFILE}, except the {\tt BOOTFILE} is where information on the bootstrap sample is stored/loaded.
+\item[Line 43] ({\tt FIXEDEFFECTS}): Usually this should be zero, or it can be left out of the file entirely.
+	Normally, the underreporting correction assumes a constant reporting rate for all respondents.
+	It is possible to condition the estimated reporting rate on one or more of the aggregate
+	explanatory variables: the program will estimate the reporting rate conditional
+	on the first {\tt FIXEDEFFECTS} columns of explanatory variables in the data file.
+\end{description}
+
+\vspace{0.5in}
+{\bf Example}: Take a look at the example parameter file 
+{\tt examples/smle/example1.txt} provided in the 
+distribution:
+
+\hspace{1in}\begin{minipage}[c]{5in}
 {\scriptsize
 \begin{verbatim}
-Parameter file - data is in fixed format; do not delete lines
-Blank line, reserved for future use
-Blank line, reserved for future use
+EXAMPLE1.TXT: SMLE example parameter file #1
+This file shows a simple example, with the standard options
+Note: data is in fixed format; do not delete lines
 NVAR (number of variables, positive integer)
-1 
+1
 NOBS (number of observations, positive integer)
 1000
 NUMAGG (number of variables that are aggregate, nonnegative integer)
@@ -127,144 +262,137 @@ UNDERREPORTING_CORRECTION (correct for underreporting, logical)
 BOOTSTRAP (calculate bootstrap covariance matrix, logical)
 .false.
 LOAD_U (load random numbers from file rather than generate them, logical)
-.false.
+.true.
 RHO_TYPE (X, Fixed, Interval, or Estimate)
 X
 FIXED_RHO (Used if RHO_TYPE=FIXED, real)
-0.7
+0.0
 FIX_GAMMA (logical)
 .false.
 FIXED_GAMMA (Used if FIX_GAMMA=.true., real)
 0.0
 DATAFILE (Name of data file)
-oneobs.txt
+ex1_data.txt
 LOGFILE (Name of file to write log info)
-lfile.log 
+ex1_log.txt
 RESULTFILE (Name of file to write results to)
-smle.out
+ex1_result.txt
 UFILE (Name of file to write random numbers to, or read them from)
-testu.dat
+ex1_u.txt
 BOOTFILE (Name of file to write bootstrap sample to, or read them from)
-testboot.dat
+ex1_boot.dat
 FIXEDEFFECTS (Number of aggregate variables to treat as fixed effects)
 0
+
 \end{verbatim}
 }
+\end{minipage}
+ 
+This example shows a typical\footnote{One way that this implementation is not typical
+is that it sets {\tt LOAD\_U}$=${\tt .TRUE.}, i.e. the program is asked to
+construct the simulations based on the random numbers provided in the 
+file {\tt ex1\_u.txt}. The usual setting would be {\tt LOAD\_U}$=${\tt .FALSE.}, 
+i.e., the program should generate a new set of random numbers each time it runs.}
+implementation with basic options.
+The data are in a file named {\tt ex1\_data.txt}, and consist
+of 1,000 observations ({\tt NOBS}$=1000$) with a single explanatory 
+variable ({\tt NVAR}$= 1$) which is individual-level rather than group-level
+({\tt NUMAGG}$=0$).  The likelihood function is to be estimated using 
+the GHK simulator ({\tt SIMULATOR\_TYPE}$=${\tt GHK}) based on 100
+simulations ({\tt NSIM}$=100$), and is to be maximized using the
+DFP method with 3 restarts ({\tt RESTARTS}$=3$).  The model is to be estimated
+from the original data and not a bootstrap resample of the data 
+({\tt BOOTSTRAP}$=${\tt .FALSE.}) under the assumptions that 
+individuals accurately report the behavior of their peers
+({\tt UNDERREPORTING\_CORRECTION}$=${\tt .FALSE.}), that 
+groups always play the ``low-activity'' equilibrium 
+({\tt EQUILIBRIUM\_TYPE}$=${\tt Low}), and that the within-group
+correlation in unobservables is equal to the within-group correlation 
+in observables ({\tt RHO\_TYPE}$=${\tt X}).  Intermediate results 
+are to be output to the log file {\tt ex1\_log.txt}, and 
+final results are to be output to the results file
+{\tt ex1\_result.txt}.
 
-The program is very primitive in how it reads the data from this file.  In 
-particular it looks on specific lines of the file for specific 
-variables.  For example, it will always set {\tt DATAFILE} to whatever is in the first 12
-characters of the 33rd line in the file.  Even numbered
-lines are ignored, so they can be used for any comments one might want.
-
-A detailed description of each line in this file is as follows:
-\begin{enumerate}
-\item {\tt NVAR}: Number of exogenous explanatory variables in data set (integer).
-\item {\tt NOBS}: Number of observations in data set (integer).
-\item {\tt NUMAGG}: The first {\tt NUMAGG} explanatory variables in the data set will be treated as aggregate 
-	variables (integer).  Aggregate variables have the same effect on both the respondent and his or
-	her peers.	See Section 4.4 in the paper.
-\item {\tt NSIM}: Number of simulations to use in calculating the log-likelihood function (integer).
-	The program uses randomized Halton sequences, which accurately approximate probabilities using
-	far fewer simulations than standard random numbers.  About {\tt NSIM=100} seems to work well enough 
-	for a first pass.
-\item {\tt RESTARTS}: Number of times to run the Davidson-Fletcher-Powell (DFP) search algorithm (integer).  
-	At least {\tt RESTARTS=3} is recommended to avoid finding a local rather than global optimum.   
-	If {\tt RESTARTS=0}, the simulated annealing (SA) search algorithm will be used instead.
-\item {\tt SIMULATOR\_{}TYPE}: Type of simulator to use in calculating normal rectangle probabilities.
-	Options include (program ignores all but the first letter, not case sensitive)
-	\begin{itemize}
-		\item {\tt G(HK)}: Geweke-Hajivassiliou-Keane simulator.  A slower but more accurate simulator that 
-			is currently only available in combination  with {\tt EQUILIBRIUM\_{}TYPE=L}.
-		\item {\tt H(ybrid)}: GHK-CFS hybrid simulator.  A faster and more flexible simulator, but generates
-			a discontinuous approximate likelihood function.  It is recommended that the simulated annealing
-			search algorithm be used if {\tt SIMULATOR\_{}TYPE = HYBRID}.
-	\end{itemize}
-\item {\tt EQUILIBRIUM\_{}TYPE}: Equilibrium selection rule assumed (character). See Sections
-	2.3 and 4.2 in the paper for details.   Options include (program ignores all but 
-	the first letter, not case sensitive):
-	\begin{itemize}
-		\item {\tt L(ow)}: Low-activity equilibrium
-		\item {\tt H(igh)}: High-activity equilibrium
-		\item {\tt R(andom)}: Random equilibrium
-		\item {\tt B(ounds)}: Find selection-rule-free bounds on $\gamma$ using the likelihood bounds
-			method.
-		\item {\tt P(lot)}: Calculate selection-rule-free bounds on the likelihood function for 
-			plotting.
-		\item {\tt M(inumum)}: Find selection-rule-free bounds (lower bound only) 
-			on $\gamma$ using the likelihood bounds	method.
-	\end{itemize}
-\item {\tt UNDERREPORTING\_{}CORRECTION}: Indicates whether or not to correct for underreporting (logical).  See 
-	Section 4.3 in the paper for details.
-\item {\tt BOOTSTRAP}: Indicates whether to estimate the model once from the original sample 
-	({\tt BOOTSTRAP = .FALSE.}) or 100 times from a series of bootstrap resamples ({\tt BOOTSTRAP = .TRUE.}).
-\item {\tt LOAD\_{}U}: Indicates whether to use the internal random number generator to produce 
-	random numbers, or to load from the file specified as {\tt UFILE} (logical).  
-\item {\tt RHO\_{}TYPE}: Rule for treating the within-group correlation in unobservables $\rho_{\epsilon}$
-	See Sections 2.4 and 4.1 in the paper for details. Options include:
-	\begin{itemize}
-		\item {\tt X} (recommended): Assume $\rho_{\epsilon}=\rho_x$.
-		\item {\tt F(ixed)}: Fix $\rho_{\epsilon}$ at the value of {\tt FIXED\_RHO} specified below.
-		\item {\tt E(stimate)}: Estimate $\rho_{\epsilon}$ directly (not recommended if {\tt FIX\_GAMMA=.true.}).
-		\item {\tt I(nterval)}: Estimate $\hat{\gamma}(\rho_{\epsilon})$ function described in Section 4.1 of
-			the paper.
-	\end{itemize}
-\item {\tt FIXED\_RHO}: Value at which to fix $\rho_{\epsilon}$.  Ignored if {\tt RHO\_TYPE $\neq$ FIXED}.
-\item {\tt FIX\_GAMMA}: Indicates whether the value of $\gamma$ should be fixed rather than estimated (logical).
-	See section 2.4 in the paper for details.
-\item {\tt FIXED\_GAMMA}: Value at which to fix $\gamma$ (real).  Ignored if {\tt FIX\_GAMMA = .false.}.
-\item {\tt DATAFILE}: Name of file from which data will be read (up to 12 characters).
-\item {\tt LOGFILE}: Name of file to which log data will be written (up to 12 characters).
-	File will be overwritten.
-\item {\tt RESULTFILE}: Name of file to which estimation results will be written (up to 12 characters).  Results
-	will be appended to file.
-\item {\tt UFILE}: Name of file in which random numbers are stored (up to 12 characters, case sensitive).  
-	If {\tt LOAD\_U = .TRUE.}, then the random numbers will be read from this file.  If 
-	{\tt LOAD\_U = .FALSE.}, then the random numbers will be written to this file.
-\item {\tt BOOTFILE}: Same as {\tt UFILE}, except the {\tt BOOTFILE} is where information on the bootstrap sample is stored/loaded 
-	(up to 12 characters, case sensitive).
-\item {\tt FIXEDEFFECTS}: Usually this should be zero, or it can be left out of the file entirely.
-	Normally, the underreporting correction assumes a constant reporting rate for all respondents.
-	It is possible to condition the estimated reporting rate on one or more of the aggregate
-	explanatory variables: the program will estimate the reporting rate conditional
-	on the first {\tt FIXEDEFFECTS} columns of explanatory variables in the data file.
-\end{enumerate}
 
 \subsection{Output files}\label{sec:output_smle}
 
 The program is designed to run in the background, and does not write to standard output unless there is 
 a problem.  Several files are written out to the work directory while the program runs.
 
-\subsubsection{Results}
 
-Estimation results are appended to the file specified as {\tt RESULTFILE} in {\tt parm.dat}.
+\subsubsection{Log file}
+
+As it runs, the program writes out detailed information on its operations to the file specified as 
+{\tt LOGFILE} in the parameter file.  
+
+\subsubsection{Results file (ordinary estimation)}
+
+Estimation results are written\footnote{If the {\tt RESULTFILE} already exists, 
+the results are appended to whatever is already in the file.}
+to the file specified as {\tt RESULTFILE} in the parameter file.
 The first number written to the file is the (maximized) log-likelihood.  After that come 
 the estimates $(\hat{\rho}_x,\hat{\rho}_{\epsilon},\hat{\gamma},\hat{\beta})$.
 
-For example, with one explanatory variable, the RESULTFILE would look like this:
+{\bf Example:} If you execute the command {\tt smle example1.txt}
+from the {\tt examples/smle/} directory, the results file 
+might\footnote{On many systems the program will break long lines, 
+so be sure to look directly at the text file before importing it 
+into some other program.} look like this:
 {\scriptsize
 \begin{verbatim}
--1974.1364 0.11305 0.11305
--2.9774E-004 -1.38E-002 1.03477	
+  -2269.71293038489 0.269466878031412 0.269466878031412 -6.618180087163724E-003 -2.755343936372363E-002 0.377144904928951     
 \end{verbatim}}
-Notice that the program does not keep the output from a single run on a single line,
-but rather breaks the line after about 3 numbers.
+The interpretation of these results is simple.  The maximized log-likelihood 
+is approximately $-2269.71$.  The estimated correlation in observables 
+is $\hat{\rho}_x \approx 0.269$.  The estimated correlation in unobservables
+is also $\hat{\rho}_{\epsilon} \approx 0.269$ (note that $\hat{\rho}_x=\hat{\rho}_{\epsilon}$, 
+as specified in the parameter file).  The estimated peer effect is 
+$\hat{\gamma} \approx -6.618 \times 10^{-3}$ (essentially zero).  The estimated intercept
+is $\hat{\beta}_0 \approx -2.755 \times 10^{-2}$ and the estimated coefficient on the
+single explanatory variable is $\hat{\beta}_1 \approx  0.377$.
 
-\subsubsection{Results (interval estimation)}
+\subsubsection{Results file (bootstrap estimation)}
+
+If the user option {\tt BOOTSTRAP} (line 21 of the parameter file) is set 
+to {\tt .TRUE.}, the program will estimate the model on a (naive) bootstrap
+sample of the original data, and then write the results to {\tt RESULTFILE}.
+The program will repeat the process 100 times\footnote{If you wish to generate 
+a larger bootstrap sample, just run the program again a few times.  Because the program appends 
+the results to {\tt RESULTFILE} your new bootstrap results
+will be appended to your old results.}, drawing a new bootstrap sample
+each time.  This may take a very long time - if it takes 10 minutes
+to estimate the model once, it will take 17 hours to estimate it 100 times.
+
+{\bf Example:} If you execute the command {\tt smle example6.txt} the 
+program will create a results file called {\tt ex6\_results.txt} that
+looks something like this:
+{\scriptsize
+\begin{verbatim}
+  -2.2697129518736533E+03   0.2689591776554643  -1.0613797086889261E-02  -2.7751454571931952E-02   0.3768691221571507
+  -2.2617211025870947E+03   0.2707122386550440  -9.0122868167062196E-03  -8.1050563747404186E-03   0.3787628374547526
+  etc.
+\end{verbatim}}
+Note that the program does not calculate or report bootstrap standard errors.  
+Instead, you will need to read these bootstrap results into some standard statistical 
+analysis package and calculate the covariance matrix from them.
+
+
+\subsubsection{Results file (interval estimation)}
 
 With the {\tt RHO\_{}TYPE = INTERVAL} option, the model is estimated under 
 12 different specifications, and the results are reported for each of these 
 specifications, in the following order:
-\begin{itemize}
-	\item Standard assumption, $\rho_{\epsilon}=\rho_x$, $\gamma$ to be estimated.
-	\item $\gamma=0$, $\rho_{\epsilon}$ to be estimated.
-	\item $\rho_{\epsilon}= 0.0$, $\gamma$ to be estimated.
-	\item $\rho_{\epsilon}= 0.1$, $\gamma$ to be estimated.
+\begin{description}
+	\item[Line 1] Standard assumption, $\rho_{\epsilon}=\rho_x$, $\gamma$ to be estimated.
+	\item[Line 2] $\gamma=0$, $\rho_{\epsilon}$ to be estimated.
+	\item[Line 3] $\rho_{\epsilon}= 0.0$, $\gamma$ to be estimated.
+	\item[Line 4] $\rho_{\epsilon}= 0.1$, $\gamma$ to be estimated.
 	\item $\vdots$
-	\item $\rho_{\epsilon}= 0.9$, $\gamma$ to be estimated.
-\end{itemize}
+	\item[Line 12] $\rho_{\epsilon}= 0.9$, $\gamma$ to be estimated.
+\end{description}
 
-\subsubsection{Results (likelihood bounds estimation)}
+
+\subsubsection{Results file (likelihood bounds estimation)}
 
 Output for selection-rule-free estimation using the likelihood bounds
 approach is also different from the standard case.
@@ -281,12 +409,8 @@ upper bound $H_g$ and lower bound $L_g$ on the log-likelihood function for $\gam
 and writes $(\gamma,H_g,L_g)$. to the file.  This can be used to construct a plot
 like that seen in Figure 2 of the paper.
 
-\subsubsection{Logging}
 
-As it runs, the program writs out detailed information on its operations to the file specified as 
-{\tt LOGFILE} in {\tt parm.dat}.  
-
-\subsubsection{Checkpointing}
+\subsubsection{Checkpoint files}
 
 Because the program can potentially run for a very long time before producing the final
 data, ``checkpointing'' has been implemented.  
@@ -513,7 +637,7 @@ the third is the coefficient on peer behavior, and the remainder are coefficient
 on the other explanatory variables.
 
 
-\section{Using the {\tt psim} program}
+\section{Using the {\tt psim} program}\label{sec:psim}
 
 The {\tt psim} program generates simulated data from the model.  It is useful
 in constructing Monte Carlo experiments.
@@ -619,11 +743,33 @@ Compiling is a matter of following these steps:
 \item Repeat for the other programs.
 \end{enumerate}
 
+\section{Version history}
+
+\begin{itemize}
+	\item Version 1.1 - March 1, 2005. First publicly released version.
+	\item Version 2.0 - ???.
+		\begin{itemize}
+			\item Windows binaries are now compiled on Intel Fortran compiler, leading to 
+				a 43\% reduction in program time for SMLE.EXE and a 16\% reduction
+				for S2.EXE.
+			\item Program can now be compiled on IBM XL Fortran compiler.  This involved 3 changes to code:
+				\begin{itemize}
+					\item Workaround inserted to deal with compiler bug related to use of
+						MATMUL command with calculated indices.
+					\item Code that reads in data from text files now strips CR and LF characters from
+						end of each line.
+					\item Stack overflow error repaired.  
+				\end{itemize}
+			\item Program (windows binary version) can now take user-supplied name of parameter file.  
+					Previous version only	allowed the parameter file to be named ``parm.dat''.  
+		\end{itemize}
+\end{itemize}
+
+
 \begin{thebibliography}{breitestes Label}
 \bibitem{smle}
-Krauth, Brian V., ``Simulation-based estimation of peer effects,'' forthcoming,
-{\it Journal of Econometrics}.  Available at 
-{\tt http://www.sfu.ca/\~{}bkrauth/papers/smle.pdf}.
+Krauth, Brian V., 2006.  ``Simulation-based estimation of peer effects,'' 
+{\it Journal of Econometrics} 133(1): 243-271. 
 	
 \end{thebibliography}
 
