@@ -1,0 +1,6 @@
+hpf -O2 -Mautopar -o psim -llapack -lblas -lnag ../lib/bklibbug.f90 ../lib/bkmath.f90 monte.f90 psim.f90 
+rm *.o
+rm *.mod
+rm *~
+# 
+

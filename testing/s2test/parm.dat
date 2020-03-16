@@ -1,0 +1,40 @@
+Parameter file: Data is in fixed format; do not delete lines
+DATAFILE: name of file where data is located
+testdata.dat
+RESULTFILE: name of file to which results should be appended
+s2test.out
+LOGFILE: name of file to send logging information
+s2test.log
+NOBS: number of observations
+1000
+NVAR: number of exogenous explanatory variables
+1
+NUMAGG: number of exogenous explanatory variables that are aggregates
+0
+NSIM: number of simulations to use in calculating estimated loglikelihood
+100
+SEARCH_METHOD: DFP (Davidson-Fletcher-Powell) or SA (Simulated Annealing)
+sa
+RESTARTS: number of times to run search algorithm
+2
+EQUILIBRIUM_TYPE: equilibrium selection rule, either low, random, or high
+Low
+COVMAT_TYPE: method for calculating covariance matrix; either Hessian, OPG, or None
+OPG
+RHO_TYPE
+X 
+FIXED_RHO: value to fix rho_e at if RHO_TYPE=FIXED
+0.7000
+FIX_GAMMA: normally gamma is estimated, but it is fixed if this is .true.
+.false.
+FIXED_GAMMA: value to fix gamma at if FIX_GAMMA=.true.
+0.0000
+LOAD_U: .true. if you want random numbers loaded from UFILE, .false. if you want new random numbers
+.true.
+UFILE: name of file to which random numbers should be written (if LOAD_U=.false.) or read (if LOAD_U=.true.)
+testu.dat
+
+
+
+
+

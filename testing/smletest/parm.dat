@@ -1,0 +1,45 @@
+Parameter file: Data is in fixed format; do not delete lines
+NGROUP
+0
+NVAR
+1
+NOBS
+1000
+NUMAGG
+0
+NSIM 
+100
+RESTARTS
+3
+GTOL
+0.00001
+HI - NOT OPERATIONAL
+L .false.
+UNDERREPORTING_CORRECTION
+.true.
+BOOTSTRAP
+.false.
+LOAD_U
+.true.
+FIX_RHO
+.false.
+FIXED_RHO
+0.7000
+FIX_GAMMA
+.false.
+FIXED_GAMMA
+0.0000
+DATFILE
+testdata.dat
+LOGFILE
+smletest.log
+RESULTFILE
+smletest.out
+UFILE
+testu.dat
+BOOTFILE
+testboot.dat
+
+
+
+

@@ -1,0 +1,6 @@
+Instructions for testing SMLE:
+
+1. Copy most recent version of SMLE program to this directory, and run it.
+2. Quick test: first loglikelihood should be -2843.359.
+4. Detailed test: Run through to end, compare log file (smletest.log) to smletest.log.correct
+

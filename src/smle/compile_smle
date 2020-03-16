@@ -1,0 +1,5 @@
+hpf -O2 -Mautopar -o smle -llapack -lblas -lnag ../lib/bklibbug.f90 ../lib/bkmath.f90 smglob.f90 loglik.f90 ../lib/dfpmin.f90 ../lib/simann.f90 smutil.f90 smle.f90 
+
+rm *.o *.mod
+
+

@@ -1,0 +1,9 @@
+S2_TEST
+
+Tests basic functionality of S2 program.
+
+1. Copy the most recent version of S2 into this directory and run it.
+2. Compare S2TEST.LOG to S2TEST.LOG.CORRECT.  A quick test can be performed by 
+ killing the program after a minute and comparing the first few lines of the files.
+
+
