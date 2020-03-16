@@ -1,4 +1,10 @@
-hpf -fast -o s2 -llapack -lblas -lnag ../lib/bklibbug.f90 ../lib/bkmath.f90 s2glob.f90 loglik.f90 ../lib/dfpmin.f90 ../lib/simann.f90 smle2.f90 s2.f90
+# Bugaboo 
+#f90 -o s2 -llapack -lblas -lnag ../lib/bklibbug.f90 ../lib/bkmath.f90 s2glob.f90 loglik.f90 ../lib/dfpmin.f90 ../lib/simann.f90 smle2.f90 s2.f90
+# IBM XL Fortran compiler
+#xlf90 -O4 -qarch=auto -o s2 ../lib/bklib.f90 ../lib/bkmath.f90 s2glob.f90 loglik.f90 ../lib/dfpmin.f90 ../lib/simann.f90 smle2.f90 s2.f90
+xlf90 -qlanglvl=90pure -o s2 ../lib/bklib.f90 ../lib/bkmath.f90 s2glob.f90 loglik.f90 ../lib/dfpmin.f90 ../lib/simann.f90 smle2.f90 s2.f90
+# gnu gfortran compiler
+#gfortran -o s2 ../lib/bklib.f90 ../lib/bkmath.f90 s2glob.f90 loglik.f90 ../lib/dfpmin.f90 ../lib/simann.f90 smle2.f90 s2.f90
 rm *.o
 rm *.mod
 rm *~

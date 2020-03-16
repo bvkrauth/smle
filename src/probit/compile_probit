@@ -1,6 +1,8 @@
-f90 -o probit -llapack -lblas -lnag ../lib/bklibbug.f90 ../lib/bkmath.f90 probit.f90
+#f90 -o probit -llapack -lblas -lnag ../lib/bklibbug.f90 ../lib/bkmath.f90 probit.f90
+xlf90 -qlanglvl=95pure -o probit ../lib/bklib.f90 ../lib/bkmath.f90 probit.f90
 rm *.mod *.o
 perl makemc.pl
-f90 -o probitmc -llapack -lblas -lnag ../lib/bklibbug.f90 ../lib/bkmath.f90 ../psim/monte.f90 probitmc.f90
+#f90 -o probitmc -llapack -lblas -lnag ../lib/bklibbug.f90 ../lib/bkmath.f90 ../psim/monte.f90 probitmc.f90
+xlf90 -o probitmc ../lib/bklib.f90 ../lib/bkmath.f90 ../psim/monte.f90 probitmc.f90
 rm probitmc.f90 *.mod *.o
 

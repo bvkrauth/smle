@@ -1,5 +1,13 @@
-hpf -O2 -Mautopar -o smle -llapack -lblas -lnag ../lib/bklibbug.f90 ../lib/bkmath.f90 smglob.f90 loglik.f90 ../lib/dfpmin.f90 ../lib/simann.f90 smutil.f90 smle.f90 
+# Bugaboo (Portland Group HPF compiler)
+#hpf -O2 -Mautopar -o smle -llapack -lblas -lnag ../lib/bklibbug.f90 ../lib/bkmath.f90 smglob.f90 loglik.f90 ../lib/dfpmin.f90 ../lib/simann.f90 smutil.f90 smle.f90 
+# Robson (IBM XL Fortran compiler)
+#xlf90 -O4 -qarch=auto -o smle ../lib/bklib.f90 ../lib/bkmath.f90 smglob.f90 loglik.f90 ../lib/dfpmin.f90 ../lib/simann.f90 smutil.f90 smle.f90 
+xlf90 -o smle ../lib/bklib.f90 ../lib/bkmath.f90 smglob.f90 loglik.f90 ../lib/dfpmin.f90 ../lib/simann.f90 smutil.f90 smle.f90 
+# gfortran compiler
+#gfortran -o smle ../lib/bklib.f90 ../lib/bkmath.f90 smglob.f90 loglik.f90 ../lib/dfpmin.f90 ../lib/simann.f90 smutil.f90 smle.f90 
 
 rm *.o *.mod
+
+cp smle ../testing/smletest
 
 
