@@ -33,7 +33,7 @@ type(smcontrols), public :: smglobal
 type(sacontrols), public :: saglobal
 logical, public :: resume_from_checkpoint=.false.
 character(len=*), parameter, public:: checkpointfile="check.dat",lockfile="check.lock", &
-     version_number="1.1.1"
+     version_number="1.1.2"
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Data 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
