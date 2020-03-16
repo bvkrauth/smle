@@ -3,7 +3,7 @@
 @rem at http://www.fortran.com
 @echo Compiling...
 @rem F  -O3 -o smle.exe -tempdir . ../lib/bklib.f90 ../lib/bkmath.f90 smglob.f90 ../lib/dfpmin.f90 ../lib/simann.f90 loglik.f90 smutil.f90 smle.f90
-del *.mod
+@rem del *.mod
 @rem \Perl\bin\perl.exe makemcrep.pl
 @rem F -O3 -o smlerep.exe -tempdir . ../lib/bklib.f90 ../lib/bkmath.f90 smglob.f90 ../lib/dfpmin.f90 ../lib/simann.f90 loglik.f90 smutil.f90 smlerep.f90
 @rem del *.mod smlerep.f90
@@ -28,10 +28,7 @@ del *.mod
 @rem original 10:43
 
 @rem this is what seems to work best.  It gives a 43% reduction in calculation time.
-@rem ifort /O2 /QaxSSE3 /arch:IA32 /Qipo /Qprec-div- -o smle.exe ../lib/bklib.f90 ../lib/bkmath.f90 smglob.f90 ../lib/dfpmin.f90 ../lib/simann.f90 loglik.f90 smutil.f90 smle.f90
+ifort /O2 /QaxSSE3 /arch:IA32 /Qipo /Qprec-div- -o smle.exe ../lib/bklib.f90 ../lib/bkmath.f90 smglob.f90 ../lib/dfpmin.f90 ../lib/simann.f90 loglik.f90 smutil.f90 smle.f90
 
 
-
-@rem slow
-ifort -o smle.exe ../lib/bklib.f90 ../lib/bkmath.f90 smglob.f90 ../lib/dfpmin.f90 ../lib/simann.f90 loglik.f90 smutil.f90 smle.f90
-
+del *.mod *.obj
