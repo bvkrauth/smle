@@ -6,7 +6,7 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 module smglob 
-use bklib, only : DP
+use bklib, only : DP,strlen
 implicit none
 private
 public :: save_dfp_checkpoint, save_sa_checkpoint, load_checkpoint, load_dfp_checkpoint, &
@@ -17,7 +17,7 @@ type, public :: smcontrols
    integer :: nobs,nvar,ngroups,maxgroupsize,nsim,restarts,numagg,istart,run_number
    logical :: fix_gamma
    real(kind=DP) :: fixed_rho,fixed_gamma,dfpstop,gamma_start,gamma_min,gamma_max
-   character(len=12) :: logfile,resultfile
+   character(len=strlen) :: logfile,resultfile
    character(len=1) :: covmat_type,equilibrium_type,search_method,rho_type
 end type smcontrols
 
@@ -40,7 +40,11 @@ character(len=*), parameter, public :: checkpointfile="check.dat",lockfile="chec
 real(kind=DP), public :: fstar=1.0e50_dp,dfp_fp
 real(kind=DP), dimension(:), allocatable, public :: bstar
 real(kind=DP), dimension(:,:), allocatable, public :: u,x,dfp_hessin,z,covmat
-real(kind=DP), dimension(:), allocatable, public :: y,ygroup,dfp_p,dfp_g,bx
+! FOR CHECKPOINTING: replace
+ real(kind=DP), dimension(:), allocatable, public :: y,ygroup,dfp_p,dfp_g,bx
+! with:
+!real(kind=DP), dimension(:), allocatable, public :: y,ygroup,dfp_p,dfp_g,bx,mu,sigmasq
+! END FOR CHECKPOINTING
 integer, dimension(:), allocatable, public :: original_groupid,groupid,groupsize
 integer, public :: dfp_itstart
 character(len=80), public :: STARTTIME,ENDTIME

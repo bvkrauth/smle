@@ -6,7 +6,7 @@
 !
 ! Public procedures available are:
 !
-!  	LOAD_DATA		Load user options from PARM.DAT and
+!  	LOAD_DATA		Load user options from parameter file and
 !				data from data file.
 !
 !	RESAMPLE(dat)		Given a data set of size N (dat),
@@ -25,7 +25,7 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 module smutil
-  use bklib, only : dp,runif 
+  use bklib, only : dp,runif,read_buffer, get_parmfile, strlen
   use bkmath, only : pdfn,cdfinvn,ols,randint,rhalt
   use smglob
   use loglik, only : loglikelihood,dloglikelihood
@@ -69,15 +69,16 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! LOAD_DATA subroutine
 !
-! Format: load_data
+! Format: load_data()
 !
 ! Loads data and user options from the appropriate files, and 
 ! stores it in various global variables.
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine load_data()
-    character(len=12) :: datafile,ufile,bootfile,parmfile="parm.dat    ",resultfile,logfile,eqtypelong,rhotypelong,simtypelong
+    character(len=strlen) :: datafile,ufile,bootfile,parmfile="parm.dat    ",resultfile,logfile,eqtypelong,rhotypelong,simtypelong
     character(len=80) :: toss
+    character(len=strlen) :: buffer ! Introduced to solve a problem in the IBM compiler; hopefully it doesn't slow things down much
     character(len=1) :: equilibrium_type,rho_type,search_method,simulator_type
     logical :: load_u,file_found,locked
     real(kind=DP), dimension(:,:), allocatable :: dat
@@ -88,6 +89,7 @@ contains
 ! First check to see if a previous run of the program was 
 ! interrupted.  If so, restart that run.
 !---------------------------------------------------------------
+	call get_parmfile(parmfile)
     inquire(file=checkpointfile,exist=resume_from_checkpoint)
     if (resume_from_checkpoint) then
        inquire(file=lockfile,exist=locked)
@@ -95,14 +97,14 @@ contains
        call load_checkpoint()
     else
 !---------------------------------------------------------------
-! Start reading in parameter file (always PARM.DAT).
+! Start reading in parameter file (usually parm.dat).
 ! The parameter file has a specific line-by-line format; 
 ! for example, the program always looks in line #5 for 
 ! NVAR.
 !---------------------------------------------------------------
        inquire (file=parmfile,exist=file_found)
        if (.not.file_found) then 
-          stop "Error: parm.dat file not found"
+          stop "Error: parameter file not found"
        end if
        open(unit=1,file=parmfile,iostat=ios,action="read",position="rewind",status="old")
        if (ios == 0) then
@@ -110,51 +112,74 @@ contains
           read (unit=1,fmt=*,iostat=ios) toss
           read (unit=1,fmt=*,iostat=ios) toss
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) nvar ! NVAR = number of explanatory variables
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) nvar ! NVAR = number of explanatory variables
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) nobs ! NOBS = number of observations
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) nobs ! NOBS = number of observations
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios ) numagg ! NUMAGG = number of explanatory variables that are aggregates
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) numagg ! NUMAGG = number of explanatory variables that are aggregates
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) nsim ! NSIM = number of simulations to use for GHK
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) nsim ! NSIM = number of simulations to use for GHK
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) restarts ! RESTARTS = number of times to restart search with a random vector
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) restarts ! RESTARTS = number of times to restart search with a random vector
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) simtypelong ! formerly GTOL!
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) simtypelong ! formerly GTOL!
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) eqtypelong ! EQUILIBRIUM_TYPE = not operational (yet!)
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) eqtypelong ! EQUILIBRIUM_TYPE = not operational (yet!)
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) underreporting_correction ! UNDERREPORTING_CORRECTION = .true. if correction wanted
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) underreporting_correction ! UNDERREPORTING_CORRECTION = .true. if correction wanted
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) bootstrap ! BOOTSTRAP = .true. if you want to resample data
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) bootstrap ! BOOTSTRAP = .true. if you want to resample data
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) load_u ! LOAD_U = .true. if you want to use random numbers from a file
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) load_u ! LOAD_U = .true. if you want to use random numbers from a file
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) rhotypelong ! RHO_TYPE = X, F(ixed), E(stimated), or I(nterval)
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) rhotypelong ! RHO_TYPE = X, F(ixed), E(stimated), or I(nterval)
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) fixed_rho ! FIXED_RHO = correlation in unobservables (ignored if FIX_RHO=.false.)
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) fixed_rho ! FIXED_RHO = correlation in unobservables (ignored if FIX_RHO=.false.)
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) fix_gamma ! FIX_GAMMA = .true. if you want to set peer effect
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) fix_gamma ! FIX_GAMMA = .true. if you want to set peer effect
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) fixed_gamma ! FIXED_GAMMA = peer effect (ignored if FIX_GAMMA=.false.)
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) fixed_gamma ! FIXED_GAMMA = peer effect (ignored if FIX_GAMMA=.false.)
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) datafile ! DATAFILE = name of file where data is stored
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) datafile ! DATAFILE = name of file where data is stored
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) logfile ! LOGFILE = name of file where program should write log information
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) logfile ! LOGFILE = name of file where program should write log information
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) resultfile ! RESULT file = name of file where program should append results
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) resultfile ! RESULTFILE = name of file where program should append results
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) ufile ! UFILE = if (LOAD_U=.true.), the name of the file where the random
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) ufile ! UFILE = if (LOAD_U = .TRUE) name of the file where the random 
           read (unit=1,fmt=*,iostat=ios) toss 
           ! numbers can be found.  If (LOAD_U=.false.), the name of the file
           ! where program should write the random numbers it generates.
           read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) bootfile ! BOOTFILE = file for bootstraps
-          read (unit=1,fmt=*,iostat=ios) toss 
-          read (unit=1,fmt=*,iostat=ios) fixedeffects ! FIXEDEFFECTS = number of aggregate variables used for underreporting
-          close(unit=1,iostat=ios) ! We're done with PARM.DAT       
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) bootfile ! BOOTFILE = file for bootstraps
+          read (unit=1,fmt=*,iostat=ios) toss
+          call read_buffer(1,buffer)                  
+          read (unit=buffer,fmt=*,iostat=ios) fixedeffects ! FIXEDEFFECTS = number of aggregate variables used for underreporting
+! Added 6/16/2008
+          fixedeffects = max(fixedeffects,0)
+! End added 6/16/2008
+          close(unit=1,iostat=ios) ! We're done with parameter file       
        else
-          stop "Error: parm.dat file exists but cannot be opened"
+          stop "Error: parameter file exists but cannot be opened"
        end if
 !---------------------------------------------------------------
 ! A little bit of validation:
@@ -167,23 +192,23 @@ contains
           write (unit=1,iostat=ios,fmt=*) "Author: Brian Krauth, Simon Fraser University"
           write (unit=1,iostat=ios,fmt=*) "Time started:   ",starttime(1:2),":",starttime(3:4),":",starttime(5:10)
           if (nvar < 1) then
-             write (unit=1,iostat=ios,fmt=*) "Error in parm.dat: nvar < 1 not allowed"
-             stop "Error in parm.dat: nvar < 1 not allowed"
+             write (unit=1,iostat=ios,fmt=*) "Error in parameter file: nvar < 1 not allowed"
+             stop "Error in parameter file: nvar < 1 not allowed"
           end if
           if (nobs < 1) then
-             write (unit=1,iostat=ios,fmt=*) "Error in parm.dat: nobs < 1 not allowed"
-             stop "Error in parm.dat: nobs < 1 not allowed"
+             write (unit=1,iostat=ios,fmt=*) "Error in parameter file: nobs < 1 not allowed"
+             stop "Error in parameter file: nobs < 1 not allowed"
           end if
           if (numagg < 0) then
-             write (unit=1,iostat=ios,fmt=*) "Error in parm.dat: numagg < 0 not allowed"
-             stop "Error in parm.dat: numagg < 0 not allowed"
+             write (unit=1,iostat=ios,fmt=*) "Error in parameter file: numagg < 0 not allowed"
+             stop "Error in parameter file: numagg < 0 not allowed"
           elseif (numagg >= nvar) then
-             write (unit=1,iostat=ios,fmt=*) "Error in parm.dat: numagg >= nvar not allowed"
-             stop "Error in parm.dat: numagg >= nvar not allowed"
+             write (unit=1,iostat=ios,fmt=*) "Error in parameter file: numagg >= nvar not allowed"
+             stop "Error in parameter file: numagg >= nvar not allowed"
           end if
           if (nsim < 1) then
-             write (unit=1,iostat=ios,fmt=*) "Error in parm.dat: nsim < 1 not allowed"
-             stop "Error in parm.dat: nsim < 1 not allowed"
+             write (unit=1,iostat=ios,fmt=*) "Error in parameter file: nsim < 1 not allowed"
+             stop "Error in parameter file: nsim < 1 not allowed"
           end if
           simulator_type = uppercase(simtypelong(1:1))
           if (restarts < 1) then
@@ -192,29 +217,30 @@ contains
              search_method="D"
           end if
           if (fixedeffects > numagg) then 
-             write (unit=1,iostat=ios,fmt=*) "Error in parm.dat: fixedeffects>numagg not allowed"
-             stop "Error in parm.dat: fixedeffects>numagg not allowed"
+             write (unit=1,iostat=ios,fmt=*) "Error in parameter file: fixedeffects>numagg not allowed"
+             stop "Error in parameter file: fixedeffects>numagg not allowed"
           end if
           write (unit=1,iostat=ios,fmt=*) "Data: "
-          write (unit=1,iostat=ios,fmt=*) "     Data is in file ",datafile
+          write (unit=1,iostat=ios,fmt=*) "     Parameter file is  ", trim(parmfile)
+          write (unit=1,iostat=ios,fmt=*) "     Data is in file ", trim(datafile)
           write (unit=1,iostat=ios,fmt=*) "     There are ",nobs, " observations"
           write (unit=1,iostat=ios,fmt=*) "     There are ",nvar," explanatory variables "
           if (numagg > 0) then
              write (unit=1,iostat=ios,fmt=*) "     Of these,",numagg," are aggregate variables"
           end if
           if (load_u) then
-             write (unit=1,iostat=ios,fmt=*) "    Random numbers will be loaded from file ",ufile
+             write (unit=1,iostat=ios,fmt=*) "    Random numbers will be loaded from file ", trim(ufile)
              if (bootstrap) then
-                write (unit=1,iostat=ios,fmt=*) "    The bootstrap sample will be loaded from file ",bootfile
+                write (unit=1,iostat=ios,fmt=*) "    The bootstrap sample will be loaded from file ",trim(bootfile)
              end if
           end if
           write (unit=1,iostat=ios,fmt=*) "Output: "
-          write (unit=1,iostat=ios,fmt=*) "    Results will be reported in file ",resultfile
-          write (unit=1,iostat=ios,fmt=*) "    The log file is ",logfile
+          write (unit=1,iostat=ios,fmt=*) "    Results will be reported in file ",trim(resultfile)
+          write (unit=1,iostat=ios,fmt=*) "    The log file is ",trim(logfile)
           if (.not.load_u) then
-             write (unit=1,iostat=ios,fmt=*) "    Random numbers will be saved in file ",ufile," for later replication"
+             write (unit=1,iostat=ios,fmt=*) "    Random numbers will be saved in file ",trim(ufile)," for later replication"
              if (bootstrap) then
-                write (unit=1,iostat=ios,fmt=*) "    The bootstrap sample will be stored in file ",bootfile
+                write (unit=1,iostat=ios,fmt=*) "    The bootstrap sample will be stored in file ",trim(bootfile)
              end if
           end if
           write (unit=1,iostat=ios,fmt=*) "Calculation/simulation parameters:"
@@ -224,8 +250,8 @@ contains
              write (unit=1,iostat=ios,fmt=*) "    The GHK/CFS hybrid method will be used for estimating selection probabilities"
           else
              write (unit=1,iostat=ios,fmt=*) "WARNING: Program does not recognize option chosen for simulator_type:"
-             write (unit=1,iostat=ios,fmt=*) "         ",simtypelong
-             write (unit=1,iostat=ios,fmt=*) "         This is probably because of a PARM.DAT file that doesn't match"
+             write (unit=1,iostat=ios,fmt=*) "         ",trim(simtypelong)
+             write (unit=1,iostat=ios,fmt=*) "         This is probably because of a parameter file that doesn't match"
              write (unit=1,iostat=ios,fmt=*) "         the current version of the program.  Rather than stopping here,"
              write (unit=1,iostat=ios,fmt=*) "         the program will choose the default simulator."
              simulator_type = "G"
@@ -272,8 +298,8 @@ contains
                      "with fix_gamma=.true.; fix_gamma reset to .false."
              end if
           else
-             write (unit=1,iostat=ios,fmt=*) "    Fatal error in parm.dat: Illegal value for rho_type: ",rhotypelong
-             stop "Fatal error in parm.dat: Illegal value for rho_type"
+             write (unit=1,iostat=ios,fmt=*) "    Fatal error in parameter file: Illegal value for rho_type: ",trim(rhotypelong)
+             stop "Fatal error in parameter file: Illegal value for rho_type"
           end if
           if (fix_gamma) then
              bstarsize=bstarsize-1
@@ -326,8 +352,8 @@ contains
              write (unit=1,iostat=ios,fmt=*) "    Equilibrium selection rule: always play low-activity equilibrium"
              equilibrium_type = "L"
           else
-             write (unit=1,iostat=ios,fmt=*) "Fatal error in parm.dat: equilibrium_type=",eqtypelong," not allowed"
-             stop "Fatal error in parm.dat: chosen equilibrium_type not allowed"
+             write (unit=1,iostat=ios,fmt=*) "Fatal error in parameter file: equilibrium_type=",trim(eqtypelong)," not allowed"
+             stop "Fatal error in parameter file: chosen equilibrium_type not allowed"
           end if
           close (unit=1,iostat=ios)
        end if
@@ -339,10 +365,10 @@ contains
        if (.not.file_found) then 
           stop "datafile not found"
        end if
-       open (unit=1,file=datafile,iostat=ios,form="formatted",action="read",position="rewind",status="old")
+       open (unit=1,file=datafile,iostat=ios,form="formatted",action="read",position="rewind",status="old",recl=len(buffer))
 !---------------------------------------------------------------
 ! We didn't know how big our data was until reading NOBS
-! and NVAR from the PARM.DAT file.  So now we need to 
+! and NVAR from the parameter file.  So now we need to 
 ! allocate these variables.
 !---------------------------------------------------------------
        if (ios /= 0) then
@@ -359,7 +385,8 @@ contains
 ! Read in the data file, into the array DAT.
 !---------------------------------------------------------------
           do i=1,nobs
-             read (unit=1,iostat=ios,fmt=*) dat(i,:)
+             call read_buffer(1,buffer)
+             read (buffer,iostat=ios,fmt=*) dat(i,:) ! replaced
              if (ios /= 0) then
                 stop "Error: Data file has too few records"
              end if
@@ -381,7 +408,7 @@ contains
        ygroup = dat(:,2)
 !---------------------------------------------------------------
 ! This is code to deal with the case that MAXGROUPSIZE is set in
-! the PARM.DAT file
+! the parameter file
 !---------------------------------------------------------------
 !       if (maxgroupsize > 0) then
 !          nfriends=maxgroupsize-1
@@ -412,7 +439,8 @@ contains
              open (unit=1,file=ufile,iostat=ios,form="formatted",action="read",position="rewind",status="old")
              if (ios == 0) then
                 do i=1,nsim
-                   read (unit=1,iostat=ios,fmt=*) u(:,i)
+                   call read_buffer(1,buffer)
+                   read (buffer,iostat=ios,fmt=*) u(:,i) ! replaced
                    if (ios /= 0) then
                       stop "Error: ufile has too few records"
                    end if
@@ -455,15 +483,20 @@ contains
           if (ios == 0) then
              read (unit=1,iostat=ios,fmt=*) toss ! TOSS is used for comment lines; the program doesn't use it
              read (unit=1,iostat=ios,fmt=*) toss
-             read (unit=1,iostat=ios,fmt=*) ns
+             call read_buffer(1,buffer)
+             read (unit=buffer,iostat=ios,fmt=*) ns
              read (unit=1,iostat=ios,fmt=*) toss
-             read (unit=1,iostat=ios,fmt=*) nt
+             call read_buffer(1,buffer)
+             read (unit=buffer,iostat=ios,fmt=*) nt
              read (unit=1,iostat=ios,fmt=*) toss
-             read (unit=1,iostat=ios,fmt=*) t
+             call read_buffer(1,buffer)
+             read (unit=buffer,iostat=ios,fmt=*) t
              read (unit=1,iostat=ios,fmt=*) toss
-             read (unit=1,iostat=ios,fmt=*) rt
+             call read_buffer(1,buffer)
+             read (unit=buffer,iostat=ios,fmt=*) rt
              read (unit=1,iostat=ios,fmt=*) toss
-             read (unit=1,iostat=ios,fmt=*) eps
+             call read_buffer(1,buffer)
+             read (unit=buffer,iostat=ios,fmt=*) eps
              close (unit=1,iostat=ios)
           else
              continue
@@ -488,11 +521,12 @@ contains
   subroutine resample(dat,loadit,bootfile) 
     real(kind=DP), dimension(:,:), intent(inout) :: dat
     logical, intent(in) :: loadit
-    character(len=12), intent(in) :: bootfile
+    character(len=strlen), intent(in) :: bootfile
     real(kind=DP), dimension(size(dat,1),size(dat,2)) :: datout
     integer :: i,n,ios
     integer, dimension(size(dat,1)) :: swr
     logical :: file_found
+    character(len=strlen) :: buffer
     n=size(swr)
     if (loadit) then
        inquire(file=bootfile,exist=file_found)
@@ -500,7 +534,8 @@ contains
           open (unit=1,file=bootfile,iostat=ios,form="formatted",action="read",position="rewind",status="old")
           if (ios == 0) then
              do i=1,n
-                read (unit=1,iostat=ios,fmt=*) swr(i)
+                call read_buffer(1,buffer)
+                read (unit=buffer,iostat=ios,fmt=*) swr(i)
                 if (ios /=0) then
                    stop "Error: bootfile does not contain enough records"
                 end if

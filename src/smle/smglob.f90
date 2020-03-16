@@ -6,7 +6,7 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 module smglob 
-use bklib, only : DP
+use bklib, only : DP,strlen
 implicit none
 private
 public :: save_dfp_checkpoint,save_sa_checkpoint,load_checkpoint, &
@@ -16,7 +16,7 @@ type, public :: smcontrols
  integer :: nobs,nvar,maxgroupsize,nsim,restarts,numagg,fixedeffects,istart,run_number
  logical :: underreporting_correction,bootstrap,fix_gamma
  real(kind=DP) :: fixed_rho,fixed_gamma,dfpstop,gamma_start,gamma_min,gamma_max
- character(len=12) :: logfile,resultfile
+ character(len=strlen) :: logfile,resultfile
  character(len=1) :: equilibrium_type,search_method,rho_type,simulator_type
 end type smcontrols
 

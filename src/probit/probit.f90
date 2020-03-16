@@ -33,16 +33,20 @@ subroutine estimate(y,x,reprate,gamma)
   real(kind=DP), dimension(:,:), intent(in) :: x
   real(kind=DP), dimension(size(x,2)) :: b,db,g
   real(kind=DP), dimension(size(x,1)) :: pdf,cdf,d,xb,gfac
-  real(kind=DP), dimension(size(x,2),size(x,2)) :: h
-  real(kind=DP), dimension(size(x,1),size(x,2)) :: xtmp
+  real(kind=DP), dimension(:,:), allocatable :: h,xtmp
+!  real(kind=DP), dimension(size(x,2),size(x,2)) :: h
+!  real(kind=DP), dimension(size(x,1),size(x,2)) :: xtmp
   real(kind=DP), intent(in) :: reprate
   real(kind=DP), intent(inout) :: gamma
   integer :: i,j,n,ios
   logical :: file_found
   real(kind=DP) :: eps=100.0_dp,tol=0.000001_dp
+  allocate (h(size(x,2),size(x,2)),xtmp(size(x,1),size(x,2)))
   n=size(y)
   h=matmul(transpose(x),x)
   call inverse(h)
+  ! The function call below will return a segmentation fault if x is too big. 
+  ! It's the main constraint on the size of the data.
   b=matmul(h,matmul(transpose(x),y))
   do i=1,1000
      xb=matmul(x,b)
@@ -78,6 +82,7 @@ subroutine estimate(y,x,reprate,gamma)
      stop "Error: Unable to open result file"
   end if
   gamma=b(2)
+  deallocate (h,xtmp)
 end subroutine estimate
 
 

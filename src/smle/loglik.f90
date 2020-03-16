@@ -120,7 +120,10 @@ subroutine loglikelihood(p,like) ! new
   else
      bz=0.0_dp
   end if
-  bx=p(intercept) + matmul(X(:,(1+SMGLOBAL%NUMAGG):size(X,2)),p((intercept+SMGLOBAL%NUMAGG+1):size(p))) 
+! Changed 6/2008 to work around an IBM XL v10.1 compiler bug in MATMUL
+!  bx=p(intercept) + matmul(X(:,(1+SMGLOBAL%NUMAGG):size(X,2)),p((intercept+SMGLOBAL%NUMAGG+1):size(p))) ! old
+  i = SMGLOBAL%NUMAGG+1 ! new
+  bx=p(intercept) + matmul(X(:,i:),p((intercept+i):))  ! new
 !---------------------------------------------------------------
 ! The procedure CHECK_CONSTRAINTS checks to see if the parameter
 ! values satisfy the various constraints, and subtracts a penalty
@@ -438,10 +441,10 @@ subroutine check_constraints(loglikelihood,rho,rho2,gam,bx,bz)
 ! parameter values, we also put a maximum on  |BX| and |BZ|. 
 !---------------------------------------------------------------
   if ((maxval(abs(bx)) > maxbx) .or. (maxval(abs(bz)) > maxbx)) then
-     loglikelihood = loglikelihood - penalty2*sum((bx-maxbx)**2,(abs(bx) > maxbx))
+     loglikelihood = loglikelihood - penalty2*sum((bx-maxbx)**2,mask=(abs(bx) > maxbx))
      where (bx > maxbx) bx = maxbx
      where (bx < -maxbx) bx= -maxbx
-     loglikelihood = loglikelihood - penalty2*sum((bz-maxbx)**2,(abs(bz) >maxbx))
+     loglikelihood = loglikelihood - penalty2*sum((bz-maxbx)**2,mask=(abs(bz) >maxbx))
      where (bz > maxbx) bz = maxbx
      where (bz < -maxbx) bz=-maxbx
   end if

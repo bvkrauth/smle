@@ -87,6 +87,7 @@ subroutine montecarlo()
 !  elseif (reporting_rate > 1.0_dp) then 
 !    stop "Error in parmonte.dat; reporting rate > 1 not allowed"
   end if
+write (*,*) "Done loading settings"
   call probit_simulate(ngroup,maxgroupsize,numagg,eqtype,xtype,b,reporting_rate,b2) 
   deallocate(b)
 end subroutine montecarlo
@@ -136,17 +137,35 @@ subroutine probit_simulate(ngroup,maxgroupsize,numagg,eqtype,xtype,b,reporting_r
   real(kind=DP), dimension(:), intent(in) :: b,b2
   real(kind=DP), dimension(4), intent(in) :: reporting_rate
   character(len=1), intent(in) :: eqtype,xtype 
-  real(kind=DP), dimension(ngroup,maxgroupsize) :: u,bx,p1
-  real(kind=DP), dimension(ngroup,maxgroupsize,size(b)-5) :: x 
-  real(kind=DP), dimension(ngroup,size(b)-5) :: p2
-  integer, dimension(ngroup,maxgroupsize) :: y,cutoff,cutoff2
-  integer, dimension(ngroup,maxgroupsize+1) :: equil1,equil2,equil3,equil4
-  real(kind=DP), dimension(ngroup,maxgroupsize+1) :: equil5
+  ! Changed 10/2008 to solve a stack overflow problem.  These arrays can turn out
+  ! to be quite big.  When they are declared locally, the memory used to store
+  ! them will come from the stack.  But there is a lot less stack memory
+  ! than heap memory.  So the program can handle much larger data if we make
+  ! them allocatable instead (since the memory will come from the heap).
+  ! There is probably some better way to do this, but this will do.
+  real(kind=DP), dimension(:,:), allocatable :: u,bx,p1,p2,equil5,h
+  real(kind=DP), dimension(:,:,:), allocatable :: x
+  integer, dimension(:,:), allocatable :: y,cutoff,cutoff2,equil1,equil2,equil3,equil4
+!  real(kind=DP), dimension(ngroup,maxgroupsize) :: u,bx,p1
+!  real(kind=DP), dimension(ngroup,maxgroupsize,size(b)-5)  :: x 
+!  real(kind=DP), dimension(ngroup,size(b)-5) :: p2
+!  integer, dimension(ngroup,maxgroupsize) :: y,cutoff,cutoff2
+!  integer, dimension(ngroup,maxgroupsize+1) :: equil1,equil2,equil3,equil4
+!  real(kind=DP), dimension(ngroup,maxgroupsize+1) :: equil5
   real(kind=DP), dimension(1) :: equil6
-  real(kind=DP), dimension(maxgroupsize,maxgroupsize) :: h 
+!  real(kind=DP), dimension(maxgroupsize,maxgroupsize) :: h 
   real(kind=DP) :: mu,rhox,rhoe,gam,lambda,eps,k,tmp1,tmp2,sigmax,rxe,sxe
   real(kind=DP), parameter :: about_zero=1.0e-20_dp
   integer :: i,j,ios
+  ! Now we need to allocate all the big variables.
+  allocate( u(ngroup,maxgroupsize), bx(ngroup,maxgroupsize), p1(ngroup,maxgroupsize), &
+       x(ngroup,maxgroupsize,size(b)-5), p2(ngroup,size(b)-5), y(ngroup,maxgroupsize), &
+       cutoff(ngroup,maxgroupsize), cutoff2(ngroup,maxgroupsize), equil1(ngroup,maxgroupsize+1), &
+       equil2(ngroup,maxgroupsize+1), equil3(ngroup,maxgroupsize+1), equil4(ngroup,maxgroupsize+1), &
+       equil5(ngroup,maxgroupsize+1), h(maxgroupsize,maxgroupsize) ,stat=ios)
+  if (ios /= 0) then
+     write (*,*) "Error allocating variables in PROBIT_SIMULATE, ios'=",ios
+  end if
 !
 ! Step 1: First we create the x and u matrices
 !
@@ -157,7 +176,11 @@ subroutine probit_simulate(ngroup,maxgroupsize,numagg,eqtype,xtype,b,reporting_r
   call runif(p1)
   call runif(p2)
   call runif(u)
-  u=cdfinvn(u)
+! Warning: The function call below will give a segmentation fault if u is too big.
+! This is because my CDFINVN function has the same problem we fixed above 
+! (trying to make a big array from stack memory), and 
+! is the main constraint on the size of data set we can generate.
+  u=cdfinvn(u) 
   do i=1,size(x,3)
 !     x(:,:,i)=runifd(size(x,1),size(x,2))
      call runif(x(:,:,i)) ! new
@@ -376,6 +399,7 @@ subroutine probit_simulate(ngroup,maxgroupsize,numagg,eqtype,xtype,b,reporting_r
      write (unit=1,fmt=*,iostat=ios) y(i,1), real(sum(y(i,:))-y(i,1),kind=SP)/real(maxgroupsize-1,kind=SP), maxgroupsize-1, x(i,1,:)
   end do
   close(unit=1,iostat=ios)
+ deallocate( u,bx,p1,x,p2,y,cutoff,cutoff2,equil1,equil2,equil3,equil4,equil5,h)
 end subroutine probit_simulate
 
 

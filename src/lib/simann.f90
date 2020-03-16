@@ -8,6 +8,7 @@ module simann
    
 contains
 
+
 !  Version: 3.2
 !  Date: 1/22/94.
 !  Differences compared to Version 2.0:
@@ -289,7 +290,6 @@ contains
        ier = 3
        return
     end if
-
 !  If the initial value is out of bounds, notify the user and return
 !  to the calling routine.
     if (any(x > ub) .or. any(x < lb)) then
@@ -323,7 +323,7 @@ contains
        do m = 1, nt
           do j = 1, ns
              do h = 1, n
-              
+
 !  Generate XP, the trial value of X. Note use of VM to choose XP.
                 do i = 1, n
                    if (i == h) then

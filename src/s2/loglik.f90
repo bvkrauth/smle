@@ -18,13 +18,12 @@ use bkmath, only : cdfn,cdfinvn,chol
 use smglob, only : SMGLOBAL, Y, Z, X, BX, U, GROUPSIZE, GROUPID, MAXRHO, MINGAM
 implicit none
 private
-private :: probi,check_constraints
+private :: probi,check_constraints 
 public :: loglikelihood,dloglikelihood,loglikevec
 
 
 contains
   
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! LOGLIKELIHOOD function
 !
@@ -140,7 +139,9 @@ subroutine loglikevec(p,likevec) ! new
   else
      bz=0.0_dp
   end if
-  BX=p(intercept) + matmul(X(:,(1+SMGLOBAL%NUMAGG):size(X,2)),p((intercept+1+SMGLOBAL%NUMAGG):size(p)))
+! Changed 6/2008 to deal with IBM XL compiler's bug in MATMUL; it doesn't work with calculated indices (e.g., "size(p)"s )
+!  BX=p(intercept) + matmul(X(:,(1+SMGLOBAL%NUMAGG):size(X,2)),p((intercept+1+SMGLOBAL%NUMAGG):size(p)))
+  BX=p(intercept) + matmul(X(:,(1+SMGLOBAL%NUMAGG):),p((intercept+1+SMGLOBAL%NUMAGG):))
 !---------------------------------------------------------------
 ! The procedure CHECK_CONSTRAINTS checks to see if the parameter
 ! values satisfy the various constraints, and subtracts a penalty
@@ -160,7 +161,6 @@ subroutine loglikevec(p,likevec) ! new
   c=rhoe
   forall (i=1:size(c,1)) c(i,i)=1.0_dp
   c=transpose(chol(c))
-! !HPF$ INDEPENDENT
   do i=1,size(likevec)
      likevec(i) = probi(i,GROUPSIZE(i),bz(i),gam,c)
   end do
@@ -363,10 +363,10 @@ subroutine check_constraints(loglikelihood,rho,rho2,gam,bx,bz)
 ! parameter values, we also put a maximum on  |BX| and |BZ|. 
 !---------------------------------------------------------------
   if ((maxval(abs(bx)) > maxbx) .or. (maxval(abs(bz)) > maxbx)) then
-     loglikelihood = loglikelihood - penalty2*sum((bx-maxbx)**2,(abs(bx) > maxbx))
+     loglikelihood = loglikelihood - penalty2*sum((bx-maxbx)**2,mask=(abs(bx) > maxbx))
      where (bx > maxbx) bx = maxbx
      where (bx < -maxbx) bx= -maxbx
-     loglikelihood = loglikelihood - penalty2*sum((bz-maxbx)**2,(abs(bz) >maxbx))
+     loglikelihood = loglikelihood - penalty2*sum((bz-maxbx)**2,mask=(abs(bz) >maxbx))
      where (bz > maxbx) bz = maxbx
      where (bz < -maxbx) bz=-maxbx
   end if
