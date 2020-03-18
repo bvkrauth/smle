@@ -1,0 +1,151 @@
+{smcl}
+{* 16Mar2020}{...}
+{cmd:help smle}{right:also see:  {helpb smle postestimation}}
+{hline}
+
+{title:Title}
+
+{p2colset 5 15 22 2}{...}
+{p2col :{hi: smle} {hline 2}}Simulation-based estimation of peer effects{p_end}
+{p2colreset}{...}
+
+{title:Syntax}
+
+{p 8 16 2}
+{opt smle} {depvar} {it : {help varname: peervar}} {it: {help varlist : controlvars}} {ifin} [{cmd:, } 
+{opt agg:regate(varlist)}
+{it:options} ]
+
+{synoptset 20 tabbed}{...}
+{synopthdr}
+{synoptline}
+{syntab:Model}
+{synopt :{opth agg:gregate(varlist)}}additional aggregate control variables (will not be used to estimate rho_x){p_end}
+
+
+{syntab:Simulation/optimization}
+{synopt :{opt restarts(#)}}number of restarts for DFP optimizer; default is 3{p_end}
+{synopt :{opt nsim(#)}}number of simulations; default is 100.  {p_end}
+
+
+{syntab:Execution/system}
+{synopt :{opt exe:cute}}estimate model; default is to output files only{p_end}
+{synopt :{opt replace}}overwrite existing files{p_end}
+
+{synoptline}
+
+{p 4 6 2}
+weights are not supported.{p_end}
+{p 4 6 2}
+Postestimation commands supported:{help estat summarize}.{p_end}
+
+{title:Description}
+
+{pstd}
+{cmd:smle} can be used to estimate the Krauth (2006) model of discrete choice with social interactions.
+This model features a binary choice ({it:depvar}) which responds to peer average choice
+({it:peervar}), individual-level control variables ({it:controlvars}), optional aggregate-level
+control variables (specified with the {it:aggregate} option), and a probit unoabservable term.
+{p_end}
+
+{pstd}
+{cmd:smle} serves as a wrapper for an external Fortran program that does the actual estimation.
+Depending on the data set and options, estimation can take anywhere from seconds to weeks.
+By default, {cmd:smle} only generates the files needed to run the Fortran program.
+The {opt exe:cute} option tells Stata to actually run the program and generate Stata
+output.
+{p_end}
+
+{pstd}
+{cmd:smle} estimates parameters but not standard errors. 
+Use Stata's {help bootstrap} prefix to get standard errors, confidence intervals, etc.
+{p_end}
+
+
+{title:Options}
+
+{dlgtab:Model}
+
+{phang}
+{opth aggregate(varlist)} provides additional control variables to include in the model. Unlike the variables in {it:controlvars},
+these variables will not be included in the calculation of rho_x.
+{p_end}
+
+{dlgtab:Simulation/optimization}
+
+{phang}
+{opt nsim(#)} specifies the number of simulations used to approximate the likelihod function. 
+The default is 100.
+{p_end}
+
+{phang}
+{opt restarts(#)} specifies the number of restarts for the Davidson-Fletcher-Powell (DFP) optimizer. The default is 3.
+{p_end}
+
+{dlgtab:Execution/system}
+
+{phang}
+{opt exe:cute} tells Stata to actually run the Fortran program and display the results in Stata.
+{p_end}
+
+{phang}
+{opt replace} permits {cmd:smle} to overwrite existing files.
+{p_end}
+
+
+
+{title:Examples:}
+
+{pstd}Setup{p_end}
+{phang2}{cmd:. use http://www.sfu.ca/~bkrauth/code/smle_example.dta, clear}{p_end}
+
+{pstd}An ordinary probit regression for comparison{p_end}
+{phang2}{stata probit own peeravg pop}{p_end}
+
+{pstd}Basic usage  - output parameter and data files for estimation only{p_end}
+{phang2}{stata smle own peeravg npeers pop , replace }{p_end}
+
+{pstd}Basic usage - estimate model{p_end}
+{phang2}{stata smle own peeravg npeers pop , execute replace }{p_end}
+
+{marker results}{...}
+{title:Stored results}
+
+{pstd}
+{cmd:smle} stores the following in {cmd:e()}:
+
+{synoptset 20 tabbed}{...}
+{p2col 5 20 24 2: Scalars}{p_end}
+{synopt:{cmd:e(N)}}number of observations{p_end}
+{synopt:{cmd:e(loglik)}}log-likelihood{p_end}
+{synopt:{cmd:e(nsim)}}number of simulations{p_end}
+{synopt:{cmd:e(restarts)}}number of restarts{p_end}
+{synopt:{cmd:e(nvar)}}number of control variables{p_end}
+{synopt:{cmd:e(numagg)}}number of control variables that are aggregate{p_end}
+
+{synoptset 20 tabbed}{...}
+{p2col 5 20 24 2: Macros}{p_end}
+{synopt:{cmd:e(cmd)}}{cmd:smle}{p_end}
+{synopt:{cmd:e(depvar)}}name of dependent variable{p_end}
+{synopt:{cmd:e(title)}}{cmd:SMLE model}{p_end}
+{synopt:{cmd:e(properties)}}{cmd:b V}{p_end}
+
+{synoptset 20 tabbed}{...}
+{p2col 5 20 24 2: Matrices}{p_end}
+{synopt:{cmd:e(b)}}coefficient vector{p_end}
+{synopt:{cmd:e(V)}}a square matrix of zeros. {cmd: smle} does not estimate a covariance matrix, but 
+	some Stata features require one to exist.{p_end}
+
+{synoptset 20 tabbed}{...}
+{p2col 5 20 24 2: Functions}{p_end}
+{synopt:{cmd:e(sample)}}marks estimation sample{p_end}
+{p2colreset}{...}
+
+{title:Also see}
+
+{psee}
+Krauth, Brian V. "Simulation-based estimation of peer effects."  {it: Journal of Econometrics}, 2006.  
+
+{psee}
+Online:  {help smle postestimation}
+{p_end}
