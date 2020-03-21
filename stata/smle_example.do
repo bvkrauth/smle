@@ -77,40 +77,40 @@ estimates store numagg_1
 
 /* Set simulator type */
 /* Valid options: G(HK) H(ybrid - only first letter matters*/
-rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace simulator("INVALID")"' == 198
-smle own pop , peeravg(peeravg) npeers(npeers) replace simulator("g - this will be interpreted as GHK since only the first letter matters") noexecute
-smle own pop , peeravg(peeravg) npeers(npeers) replace simulator("GHK") noexecute
-smle own pop , peeravg(peeravg) npeers(npeers) replace simulator("Hybrid") `execute'
+rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace simulator(invalid)"' == 198
+smle own pop , peeravg(peeravg) npeers(npeers) replace simulator(gnome) noexecute
+smle own pop , peeravg(peeravg) npeers(npeers) replace simulator(ghk) noexecute
+smle own pop , peeravg(peeravg) npeers(npeers) replace simulator(hybrid) `execute'
 estimates store hybrid
 
 /* Set equilibrium type */
-rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium("INVALID")"' == 198
-smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium("High") `execute' 
+rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(invalid)"' == 198
+smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(high) `execute' 
 estimates store high
-smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium("Random") `execute'
+smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(random) `execute'
 estimates store random
 /* These options are not yet supported with execution */
-rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium("Bounds") execute"' == 198
-smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium("Bounds") noexecute 
-rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium("Plot") execute"' == 198
-smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium("Plot") noexecute 
-rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium("Minimum") execute"' == 198
-smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium("Minimum") noexecute 
+rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(bounds) execute"' == 198
+smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(bounds) noexecute 
+rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(plot) execute"' == 198
+smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(plot) noexecute 
+rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(minimum) execute"' == 198
+smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(minimum) noexecute 
 
 /* Set rho value/type */
 /* Valid options: X, F(ixed), E(stimate), I(nterval) - only first letter matters*/
-rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype("not valid")"' == 198
+rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype(notvalid)"' == 198
 /* Rho is a correlation so it needs to be between -1 and 1 */
 /* NOTE: when rho > 0.99, the Fortran program automatically sets it to 0.99 */
 rcof "noisily smle own pop , peeravg(peeravg) npeers(npeers) replace rho(2)" == 198
-smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype("Fixed") rho(0.2) noexecute
-smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype("Fixed") `execute'
+smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype(fixed) rho(0.2) noexecute
+smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype(fixed) `execute'
 estimates store rho_0
-smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype("Estimate") `execute'
+smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype(estimate) `execute'
 estimates store rho_estimate
 /* These options are not yet supported with execution */
-smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype("Interval") noexecute /* RUNS BUT ONLY READS FIRST ROW */
-rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype("Interval") execute"' == 198
+smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype(interval) noexecute /* RUNS BUT ONLY READS FIRST ROW */
+rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype(interval) execute"' == 198
 
 /* Set gamma value */
 /* No restrictions on gamma, but when gamma = 0, the Fortran program makes it 0.001 to avoid divide-by-zero errors */

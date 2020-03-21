@@ -11,7 +11,7 @@ program define smle, eclass
 		reals: */ rho(real 0.0) GAMma(real 0.0) /*
 		optionally_on: */ FIXGamma UNDerreporting replace /*
 		optionally_off: */ noEXEcute /*
-		strings: */ EQuilibrium(string) RHOType(string) SIMulator(string) OPTimizer(string) COVmat(string) save(string) Ufile(string) ]
+		strings: */ EQuilibrium(name) RHOType(name) SIMulator(name) OPTimizer(name) COVmat(name) save(string) Ufile(string) ]
 	** Add defaults 
 	*** Optionally on 
 	foreach opt in fixgamma underreporting {
@@ -24,19 +24,19 @@ program define smle, eclass
 	}
 	*** Optional strings
 	if "`simulator'" == "" {
-		local simulator "GHK"
+		local simulator "ghk"
 	}
 	if "`optimizer'" == "" {
-		local optimizer "DFP"
+		local optimizer "dfp"
 	}
 	if "`covmat'" == "" {
-		local covmat "None"
+		local covmat "none"
 	}
 	if "`equilibrium'" == "" {
-		local equilibrium "Low"
+		local equilibrium "low"
 	}
 	if "`rhotype'" == "" {
-		local rhotype "X"
+		local rhotype "x"
 	}
 	** Check arguments for validity
 	*** Numerical arguments 
