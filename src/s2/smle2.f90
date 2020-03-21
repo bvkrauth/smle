@@ -4,7 +4,7 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 module smle2
-  use bklib, only : DP,runif  ! machine-specific code
+  use bklib, only : DP,runif,read_buffer,get_parmfile,strlen  ! machine-specific code
   use bkmath, only : pdfn,cdfinvn,ols,rhalt,inverse  ! useful math functions
   use smglob ! global variables
   use loglik, only : loglikelihood, dloglikelihood, loglikevec ! log-likelihood
@@ -282,9 +282,9 @@ contains
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine load_data()
-    character(len=12) :: datafile,ufile,parmfile="parm.dat    ",resultfile,logfile, &
+    character(len=strlen) :: datafile,ufile,parmfile="parm.dat    ",resultfile,logfile, &
          covtypelong="opg         ",eqtypelong="low         ",searchmethlong="dfp         ", &
-         rhotypelong=".false.     "
+         rhotypelong=".false.     ", buffer
     character(len=80) :: toss
     character(len=1) :: covmat_type,equilibrium_type,search_method,rho_type
     logical :: load_u,file_found,locked
@@ -300,6 +300,7 @@ contains
 ! interrupted.  If so, restart that run and skip everything
 ! else.
 !---------------------------------------------------------------
+	call get_parmfile(parmfile)
     inquire(file=checkpointfile,exist=resume_from_checkpoint)
     if (resume_from_checkpoint) then
        inquire(file=lockfile,exist=locked)
@@ -332,39 +333,56 @@ contains
        else
           read (unit=1,fmt=*,iostat=ios) toss ! TOSS is used for comment lines; the program doesn't use it
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) datafile ! DATAFILE = name of file where data is stored
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) datafile ! DATAFILE = name of file where data is stored
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) resultfile ! RESULT file = name of file where program should append results
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) resultfile ! RESULT file = name of file where program should append results
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) logfile ! LOGFILE = name of file where program should write log information
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) logfile ! LOGFILE = name of file where program should write log information
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) nobs ! NOBS = number of observations
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) nobs ! NOBS = number of observations
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) nvar ! NVAR = number of explanatory variables
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) nvar ! NVAR = number of explanatory variables
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) numagg ! NUMAGG = number of explanatory variables that are aggregates
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) numagg ! NUMAGG = number of explanatory variables that are aggregates
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) nsim ! NSIM = number of simulations to use for GHK
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) nsim ! NSIM = number of simulations to use for GHK
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) searchmethlong ! "DFP", or "SA"
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) searchmethlong ! "DFP", or "SA"
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) restarts ! RESTARTS = number of times to restart search with a random vector
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) restarts ! RESTARTS = number of times to restart search with a random vector
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) eqtypelong ! EQUILIBRIUM_TYPE: high,low,random
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) eqtypelong ! EQUILIBRIUM_TYPE: high,low,random
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) covtypelong ! "OPG", "HESSIAN", or "NONE" 
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) covtypelong ! "OPG", "HESSIAN", or "NONE" 
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) rhotypelong ! RHO_TYPE = .true. if you want to set correlation in unobservables
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) rhotypelong ! RHO_TYPE = .true. if you want to set correlation in unobservables
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) fixed_rho ! FIXED_RHO = correlation in unobservables (ignored if RHO_TYPE!="FIXED")
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) fixed_rho ! FIXED_RHO = correlation in unobservables (ignored if RHO_TYPE!="FIXED")
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) fix_gamma ! FIX_GAMMA = .true. if you want to set peer effect
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) fix_gamma ! FIX_GAMMA = .true. if you want to set peer effect
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) fixed_gamma ! FIXED_GAMMA = peer effect (ignored if FIX_GAMMA=.false.)
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) fixed_gamma ! FIXED_GAMMA = peer effect (ignored if FIX_GAMMA=.false.)
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) load_u ! LOAD_U = .true. if you want to use random numbers from a file
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) load_u ! LOAD_U = .true. if you want to use random numbers from a file
           read (unit=1,fmt=*,iostat=ios) toss
-          read (unit=1,fmt=*,iostat=ios) ufile ! UFILE = if (LOAD_U=.true.), the name of the file where the random
+          call read_buffer(1,buffer)
+          read (unit=buffer,fmt=*,iostat=ios) ufile ! UFILE = if (LOAD_U=.true.), the name of the file where the random
                                                ! numbers can be found.  If (LOAD_U=.false.), the name of the file
                                                ! where program should write the random numbers it generates.
           close(unit=1,iostat=ios) ! We're done with PARM.DAT  
@@ -378,20 +396,20 @@ contains
           write (unit=1,iostat=ios,fmt=*) "Author: Brian Krauth, Simon Fraser University"
           write (unit=1,iostat=ios,fmt=*) "Time started:   ",starttime(1:2),":",starttime(3:4),":",starttime(5:10)
           write (unit=1,iostat=ios,fmt=*) "Data:"
-          write (unit=1,iostat=ios,fmt=*) "  Data in file ",datafile
+          write (unit=1,iostat=ios,fmt=*) "  Data in file ",trim(datafile)
           write (unit=1,iostat=ios,fmt=*) "  There are",nobs," observations"
           write (unit=1,iostat=ios,fmt=*) "  There are",nvar," explanatory variables"
           if (numagg > 0) then
              write (unit=1,iostat=ios,fmt=*) "  Of them,",numagg," are aggregate variables"
           end if
           if (load_u) then
-             write (unit=1,iostat=ios,fmt=*) "  Random numbers will be read from file ",ufile
+             write (unit=1,iostat=ios,fmt=*) "  Random numbers will be read from file ",trim(ufile)
           end if
           write (unit=1,iostat=ios,fmt=*) "Output:"
-          write (unit=1,iostat=ios,fmt=*) "  Results will be written to file ",resultfile
-          write (unit=1,iostat=ios,fmt=*) "  Log file is ",logfile
+          write (unit=1,iostat=ios,fmt=*) "  Results will be written to file ",trim(resultfile)
+          write (unit=1,iostat=ios,fmt=*) "  Log file is ",trim(logfile)
           if (.not.load_u) then
-             write (unit=1,iostat=ios,fmt=*) "  Random numbers will be written to file ",ufile
+             write (unit=1,iostat=ios,fmt=*) "  Random numbers will be written to file ",trim(ufile)
           end if
           write (unit=1,iostat=ios,fmt=*) "Estimation parameters:"
           write (unit=1,iostat=ios,fmt=*) "  Likelihood will be estimated using  ",nsim," simulations"
