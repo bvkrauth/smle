@@ -9,12 +9,12 @@ program define smle, eclass
 	syntax varlist(min = 2) [if] [in] , [ AGGregate(varlist) GRoupid(varname) NPeers(varname) PEERavg(varname) /*
 		integers: */ RESTarts(integer 3) NSim(integer 100) /*
 		reals: */ rho(real 0.0) GAMma(real 0.0) /*
-		optionally_on: */ FIXGamma UNDerreporting_correction replace /*
+		optionally_on: */ FIXGamma UNDerreporting replace /*
 		optionally_off: */ noEXEcute /*
-		strings: */ EQuilibrium(string) RHOType(string) SIMulator_type(string) OPTimizer(string) COVmat(string) save(string) Ufile(string) ]
+		strings: */ EQuilibrium(string) RHOType(string) SIMulator(string) OPTimizer(string) COVmat(string) save(string) Ufile(string) ]
 	** Add defaults 
 	*** Optionally on 
-	foreach opt in fixgamma underreporting_correction {
+	foreach opt in fixgamma underreporting {
 		if "``opt''" == "" {
 			local `opt' ".false." 
 		}
@@ -23,8 +23,8 @@ program define smle, eclass
 		}
 	}
 	*** Optional strings
-	if "`simulator_type'" == "" {
-		local simulator_type "GHK"
+	if "`simulator'" == "" {
+		local simulator "GHK"
 	}
 	if "`optimizer'" == "" {
 		local optimizer "DFP"
@@ -73,8 +73,8 @@ program define smle, eclass
 		di as error "Cannot execute for rhotype = `rhotype'"
 		error 198
 	}
-	if !inlist(upper(substr("`simulator_type'",1,1)), "G", "H") { 
-		di as error "Invalid value for simulator_type: `simulator_type' (should be GHK or Hybrid)"
+	if !inlist(upper(substr("`simulator'",1,1)), "G", "H") { 
+		di as error "Invalid value for simulator: `simulator' (should be GHK or Hybrid)"
 		error 198
 	}
 	if !inlist(upper(substr("`optimizer'",1,1)), "D", "S") { 
@@ -203,11 +203,11 @@ program define smle, eclass
 		file write fh "RESTARTS: number of times to run search algorithm" _newline
 		file write fh "`restarts'" _newline
 		file write fh "SIMULATOR_TYPE: simulator to use in calculating normal rectangle probabilities" _newline
-		file write fh "`simulator_type'" _newline  
+		file write fh "`simulator'" _newline  
 		file write fh "EQUILIBRIUM_TYPE: equilibrium selection rule, either low, random, or high" _newline
 		file write fh "`equilibrium'" _newline
 		file write fh "UNDERREPORTING_CORRECTION: correct for underreporting" _newline
-		file write fh "`underreporting_correction'" _newline  
+		file write fh "`underreporting'" _newline  
 		file write fh "BOOTSTRAP: " _newline
 		file write fh ".false." _newline  
 		file write fh "LOAD_U: .true. if you want random numbers loaded from UFILE, .false. if you want new random numbers" _newline
@@ -276,7 +276,6 @@ program define smle, eclass
 		di "To estimate model, put these two files in the same directory as smle.exe, and execute the command" 
 		di as result " smle `parmfile'"
 	}
-	type `parmfile'
 	** Execute
 	if "`execute'" == "" {
 		capture erase "`resultfile'"
@@ -317,7 +316,7 @@ program define smle, eclass
 		matrix colnames V = `bnames'
 		ereturn post b V, depname(`own_choice') obs(`nobs') esample(`touse')
 		ereturn local title "SMLE estimates"
-		ereturn local simulator_type "`simulator_type'"
+		ereturn local simulator "`simulator_type'"
 		ereturn local equilibrium_type "`equilibrium_type'"
 		ereturn local rhotype "`rhotype'"
 		ereturn scalar loglik = loglik
@@ -331,7 +330,7 @@ program define smle, eclass
 		if (upper("`fixgamma'") == ".TRUE.") {
 			ereturn scalar fixed_gamma = `gamma'
 		}
-		if (upper("`underreporting_correction'") == ".TRUE.") {
+		if (upper("`underreporting'") == ".TRUE.") {
 			ereturn scalar report_rate = .
 		}
 		ereturn local cmdline "smle `0'"

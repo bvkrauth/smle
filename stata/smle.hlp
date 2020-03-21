@@ -32,13 +32,13 @@
 {synopt :{opt fixg:amma}}fix the value of peer effect (gamma) rather than estimating it{p_end}
 {synopt :{opt gam:ma(#)}}value for gamma (if fixgamma is on){p_end}
 {synopt :{opt eq:uilibrium(string)}}equilbrium selection rule{p_end}
-{synopt :{opt und:erreporting_correction}}include underreporting correction{p_end}
+{synopt :{opt und:erreporting}}include underreporting correction{p_end}
 {synopt :{opt cov:mat(string)}}under construction{p_end}
 
 {syntab:Simulation/optimization}
 {synopt :{opt ns:im(#)}}number of simulations; default is 100.  {p_end}
 {synopt :{opt rest:arts(#)}}number of restarts for DFP optimizer; default is 3{p_end}
-{synopt :{opt sim:ulator_type(string)}}simulator type; default is "GHK".  {p_end}
+{synopt :{opt sim:ulator(string)}}simulator; default is "GHK".  {p_end}
 {synopt :{opt opt:imizer(string)}}optimization method; default is "DFP".  {p_end}
 {synopt :{opt ufile(string)}}under construction{p_end}
 
@@ -124,7 +124,7 @@ these variables will not be included in the calculation of rho_x.
 {p_end}
 
 {phang}
-{opt underreporting_correction} adds an adjustment for differential reporting of own choice versus peer choice.
+{opt underreporting} adds an adjustment for differential reporting of own choice versus peer choice.
 	See Krauth (2006) for details.
 {p_end}
 
@@ -145,7 +145,7 @@ The default is 100.
 {p_end}
 
 {phang}
-{opt simulator_type(string)} specifies the simulator to be used. Options are GHK (the default) and Hybrid.
+{opt simulator(string)} specifies the simulator to be used. Options are GHK (the default) and Hybrid.
 {p_end}
 
 {phang}
@@ -203,7 +203,7 @@ or in temporary files (otherwise).
 {synopt:{cmd:e(numagg)}}number of control variables that are aggregate{p_end}
 {synopt:{cmd:e(fixed_rho)}}value of rho if {cmd:rhotype("Fixed")}{p_end}
 {synopt:{cmd:e(fixed_gamma)}}value of gamma if {cmd:fixgamma}{p_end}
-{synopt:{cmd:e(report_rate)}}reporting rate if {cmd:underreporting_correction} - not currently available{p_end}
+{synopt:{cmd:e(report_rate)}}reporting rate if {cmd:underreporting} - not currently available{p_end}
 
 
 {synoptset 20 tabbed}{...}
@@ -211,7 +211,7 @@ or in temporary files (otherwise).
 {synopt:{cmd:e(cmd)}}{cmd:smle}{p_end}
 {synopt:{cmd:e(cmdline)}}the full command line as called{p_end}
 {synopt:{cmd:e(rhotype)}}rho type{p_end}
-{synopt:{cmd:e(simulator_type)}}simulator{p_end}
+{synopt:{cmd:e(simulator)}}simulator{p_end}
 {synopt:{cmd:e(title)}}{cmd:SMLE model}{p_end}
 {synopt:{cmd:e(properties)}}{cmd:b V}{p_end}
 {synopt:{cmd:e(depvar)}}name of dependent variable{p_end}

@@ -75,12 +75,12 @@ rcof "noisily smle own pop, peeravg(peeravg) npeers(npeers) aggregate(pop)" == 4
 smle own pop , peeravg(peeravg) npeers(npeers) replace aggregate(popurban) `execute'
 estimates store numagg_1
 
-/* Set simulator_type */
+/* Set simulator type */
 /* Valid options: G(HK) H(ybrid - only first letter matters*/
-rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace simulator_type("INVALID")"' == 198
-smle own pop , peeravg(peeravg) npeers(npeers) replace simulator_type("g - this will be interpreted as GHK since only the first letter matters") noexecute
-smle own pop , peeravg(peeravg) npeers(npeers) replace simulator_type("GHK") noexecute
-smle own pop , peeravg(peeravg) npeers(npeers) replace simulator_type("Hybrid") `execute'
+rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace simulator("INVALID")"' == 198
+smle own pop , peeravg(peeravg) npeers(npeers) replace simulator("g - this will be interpreted as GHK since only the first letter matters") noexecute
+smle own pop , peeravg(peeravg) npeers(npeers) replace simulator("GHK") noexecute
+smle own pop , peeravg(peeravg) npeers(npeers) replace simulator("Hybrid") `execute'
 estimates store hybrid
 
 /* Set equilibrium type */
@@ -117,8 +117,8 @@ rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype("I
 smle own pop , peeravg(peeravg) npeers(npeers) replace fixgamma gamma(0) `execute'
 est store gamma0
 
-/* Use underreporting_correction */
-smle own pop , peeravg(peeravg) npeers(npeers) replace underreporting_correction `execute'
+/* Use underreporting correction */
+smle own pop , peeravg(peeravg) npeers(npeers) replace underreporting `execute'
 estimates store under
 
 est table *, b(%9.3f) se title(`"execute = "`execute'" "') equations(1)
