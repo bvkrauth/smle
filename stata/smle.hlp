@@ -12,32 +12,45 @@
 {title:Syntax}
 
 {p 8 16 2}
-{opt smle} {depvar} {it : {help varname: peervar}} {it : {help varname: npeers}} {it: {help varlist : controlvars}} {ifin} [{cmd:, } 
-{opt agg:regate(varlist)}
+{opt smle} {depvar} {it: {help varlist : controlvars}} {ifin} [{cmd:, } 
+{opth peer:avg(varname)}
+{opth np:eers(varname)}
+{opth gr:oupid(varname)}
 {it:options} ]
 
 {synoptset 30 tabbed}{...}
 {synopthdr}
 {synoptline}
 {syntab:Model}
+{synopt :{opth gr:oupid(varname)}}variable identifying the peer group (if group-based sample){p_end}
+{synopt :{opth peer:avg(varname)}}variable describing peer average choice (if individual-based sample){p_end}
+{synopt :{opth np:eers(varname)}}variable describing number of peers (if individual-based sample){p_end}
+
 {synopt :{opth agg:gregate(varlist)}}additional aggregate control variables (will not be used to estimate rho_x){p_end}
 {synopt :{opt rhot:ype}}rule for calculating cross-peer correlation in unobservables (rho_e){p_end}
 {synopt :{opt rho(#)}}value for rho_epsilon (if rhotype == "Fixed") {p_end}
 {synopt :{opt fixg:amma}}fix the value of peer effect (gamma) rather than estimating it{p_end}
 {synopt :{opt gam:ma(#)}}value for gamma (if fixgamma is on){p_end}
 {synopt :{opt eq:uilibrium(string)}}equilbrium selection rule{p_end}
-{synopt :{opt und:erreporting_correction}}includes underreporting correction{p_end}
+{synopt :{opt und:erreporting_correction}}include underreporting correction{p_end}
+{synopt :{opt cov:mat(string)}}under construction{p_end}
 
 {syntab:Simulation/optimization}
-{synopt :{opt rest:arts(#)}}number of restarts for DFP optimizer; default is 3{p_end}
 {synopt :{opt ns:im(#)}}number of simulations; default is 100.  {p_end}
-{synopt :{opt sim:ulator_type(string)}}simulator type; default is GHK.  {p_end}
-
+{synopt :{opt rest:arts(#)}}number of restarts for DFP optimizer; default is 3{p_end}
+{synopt :{opt sim:ulator_type(string)}}simulator type; default is "GHK".  {p_end}
+{synopt :{opt opt:imizer(string)}}optimization method; default is "DFP".  {p_end}
+{synopt :{opt ufile(string)}}under construction{p_end}
 
 {syntab:Execution/system}
-{synopt :{opt exe:cute}}estimate model; default is to output files only{p_end}
+{synopt :{opt noexe:cute}}do not estimate model{p_end}
+{synopt :{opt save(string)}}save intermediate files{p_end}
 {synopt :{opt replace}}overwrite existing files{p_end}
 {synoptline}
+{p 4 6 2}
+Either {cmd:groupid} (for group-based samples) or 
+{cmd:peeravg} and {cmd:npeers} (for individual-based samples)
+must be provided.{p_end}
 {p 4 6 2}
 weights are not supported.{p_end}
 {p 4 6 2}
@@ -48,16 +61,15 @@ Postestimation commands supported:{help estat summarize}.{p_end}
 {pstd}
 {cmd:smle} can be used to estimate the Krauth (2006) model of discrete choice with social interactions.
 This model features a binary choice ({it:depvar}) which responds to peer average choice
-({it:peervar}), individual-level control variables ({it:controlvars}), optional aggregate-level
+({it:peeravg}), individual-level control variables ({it:controlvars}), optional aggregate-level
 control variables (specified with the {it:aggregate} option), and a probit unoabservable term.
 {p_end}
 
 {pstd}
-{cmd:smle} serves as a wrapper for an external Fortran program that does the actual estimation.
+{cmd:smle} serves as a wrapper for one of two external Fortran programs that do the actual estimation.
 Depending on the data set and options, estimation can take anywhere from seconds to weeks.
-By default, {cmd:smle} only generates the files needed to run the Fortran program.
-The {opt exe:cute} option tells Stata to actually run the program and generate Stata
-output.
+The {opt noexecute} option allows you to generate the files needed to run the Fortran 
+program and run it separately by hand.
 {p_end}
 
 {pstd}
@@ -68,6 +80,20 @@ Use Stata's {help bootstrap} prefix to get standard errors, confidence intervals
 {title:Options}
 
 {dlgtab:Model}
+
+{phang}
+{opth groupid(varname)} identifies the group ID, if you have a group-based sample. If {cmd: groupid} is provided,
+the program will use it to calculate {cmd:peeravg} and {cmd:npeers} from the data.  If {cmd: groupid} is {it:not} provided, 
+both {cmd:peeravg} and {cmd:npeers} must be provided.
+{p_end}
+
+{phang}
+{opth peeravg(varname)} provides the peer average choice, if you have an individual-based sample.
+{p_end}
+
+{phang}
+{opth npeers(varname)} provides the number of peers used to construct {cmd:peeravg}, if you have an individual-based sample.
+{p_end}
 
 {phang}
 {opth aggregate(varlist)} provides additional control variables to include in the model. Unlike the variables in {it:controlvars},
@@ -102,6 +128,11 @@ these variables will not be included in the calculation of rho_x.
 	See Krauth (2006) for details.
 {p_end}
 
+{phang}
+{opt covmat(string)} is under construction.
+{p_end}
+
+
 {dlgtab:Simulation/optimization}
 
 {phang}
@@ -117,10 +148,25 @@ The default is 100.
 {opt simulator_type(string)} specifies the simulator to be used. Options are GHK (the default) and Hybrid.
 {p_end}
 
+{phang}
+{opt optimizer(string)} specifies the otpimization method to be used. Options are DFP (the default) and SA.
+{p_end}
+
+{phang}
+{opt ufile(string)} is under construction.
+{p_end}
+
 {dlgtab:Execution/system}
 
 {phang}
-{opt execute} tells Stata to actually run the Fortran program and display the results in Stata.
+{opt noexecute} tells {cmd:smle} not to run the Fortran program to generate estimates. Instead, 
+the intermediate files are saved so that the user can run the Fortran program separately.
+{p_end}
+
+{phang}
+{opt save(string)} identifies a folder in which to save intermediate files. If {cmd:save} is
+not provided, intermediate files will be saved in the working directory (if {cmd:noexecute})
+or in temporary files (otherwise).
 {p_end}
 
 {phang}
@@ -136,10 +182,10 @@ The default is 100.
 {phang2}{stata probit own peeravg pop}{p_end}
 
 {pstd}Basic usage  - output parameter and data files for estimation only{p_end}
-{phang2}{stata smle own peeravg npeers pop , replace }{p_end}
+{phang2}{stata smle own peeravg npeers pop , noexecute replace }{p_end}
 
 {pstd}Basic usage - estimate model{p_end}
-{phang2}{stata smle own peeravg npeers pop , execute replace }{p_end}
+{phang2}{stata smle own peeravg npeers pop , replace }{p_end}
 
 {marker results}{...}
 {title:Stored results}
