@@ -12,28 +12,32 @@
 {title:Syntax}
 
 {p 8 16 2}
-{opt smle} {depvar} {it : {help varname: peervar}} {it: {help varlist : controlvars}} {ifin} [{cmd:, } 
+{opt smle} {depvar} {it : {help varname: peervar}} {it : {help varname: npeers}} {it: {help varlist : controlvars}} {ifin} [{cmd:, } 
 {opt agg:regate(varlist)}
 {it:options} ]
 
-{synoptset 20 tabbed}{...}
+{synoptset 30 tabbed}{...}
 {synopthdr}
 {synoptline}
 {syntab:Model}
 {synopt :{opth agg:gregate(varlist)}}additional aggregate control variables (will not be used to estimate rho_x){p_end}
-
+{synopt :{opt rhot:ype}}rule for calculating cross-peer correlation in unobservables (rho_e){p_end}
+{synopt :{opt rho(#)}}value for rho_epsilon (if rhotype == "Fixed") {p_end}
+{synopt :{opt fixg:amma}}fix the value of peer effect (gamma) rather than estimating it{p_end}
+{synopt :{opt gam:ma(#)}}value for gamma (if fixgamma is on){p_end}
+{synopt :{opt eq:uilibrium(string)}}equilbrium selection rule{p_end}
+{synopt :{opt und:erreporting_correction}}includes underreporting correction{p_end}
 
 {syntab:Simulation/optimization}
-{synopt :{opt restarts(#)}}number of restarts for DFP optimizer; default is 3{p_end}
-{synopt :{opt nsim(#)}}number of simulations; default is 100.  {p_end}
+{synopt :{opt rest:arts(#)}}number of restarts for DFP optimizer; default is 3{p_end}
+{synopt :{opt ns:im(#)}}number of simulations; default is 100.  {p_end}
+{synopt :{opt sim:ulator_type(string)}}simulator type; default is GHK.  {p_end}
 
 
 {syntab:Execution/system}
 {synopt :{opt exe:cute}}estimate model; default is to output files only{p_end}
 {synopt :{opt replace}}overwrite existing files{p_end}
-
 {synoptline}
-
 {p 4 6 2}
 weights are not supported.{p_end}
 {p 4 6 2}
@@ -61,7 +65,6 @@ output.
 Use Stata's {help bootstrap} prefix to get standard errors, confidence intervals, etc.
 {p_end}
 
-
 {title:Options}
 
 {dlgtab:Model}
@@ -69,6 +72,34 @@ Use Stata's {help bootstrap} prefix to get standard errors, confidence intervals
 {phang}
 {opth aggregate(varlist)} provides additional control variables to include in the model. Unlike the variables in {it:controlvars},
 these variables will not be included in the calculation of rho_x.
+{p_end}
+
+{phang}
+{opt rhotype(string)} allows alternative ways of estimating the within-peer-group correlation in unobservables (rho_e).
+	Options include X, Fixed, Estimate, and Interval. Interval is not currently supported within Stata.
+{p_end}
+
+{phang}
+{opt rho(#)} sets the fixed value for rho_e. It only applies if {cmd:rhotype("Fixed")}.
+{p_end}
+
+{phang}
+{opt fixgamma} provides the option to fix the peer effect (gamma) at some predetermined value.
+{p_end}
+
+{phang}
+{opt gamma(#)} sets the fixed value for gamma. It only applies if {cmd:fixgamma}.
+{p_end}
+
+{phang}
+{opt equilibrium(string)} allows the user to set the equilibrium selection rule. Options include
+	Low (the default), High, Random, Bounds, Plot and Minimum. Bounds, Plot and Minimum are not 
+	currently supported within Stata.
+{p_end}
+
+{phang}
+{opt underreporting_correction} adds an adjustment for differential reporting of own choice versus peer choice.
+	See Krauth (2006) for details.
 {p_end}
 
 {dlgtab:Simulation/optimization}
@@ -82,17 +113,19 @@ The default is 100.
 {opt restarts(#)} specifies the number of restarts for the Davidson-Fletcher-Powell (DFP) optimizer. The default is 3.
 {p_end}
 
+{phang}
+{opt simulator_type(string)} specifies the simulator to be used. Options are GHK (the default) and Hybrid.
+{p_end}
+
 {dlgtab:Execution/system}
 
 {phang}
-{opt exe:cute} tells Stata to actually run the Fortran program and display the results in Stata.
+{opt execute} tells Stata to actually run the Fortran program and display the results in Stata.
 {p_end}
 
 {phang}
 {opt replace} permits {cmd:smle} to overwrite existing files.
 {p_end}
-
-
 
 {title:Examples:}
 
@@ -122,13 +155,20 @@ The default is 100.
 {synopt:{cmd:e(restarts)}}number of restarts{p_end}
 {synopt:{cmd:e(nvar)}}number of control variables{p_end}
 {synopt:{cmd:e(numagg)}}number of control variables that are aggregate{p_end}
+{synopt:{cmd:e(fixed_rho)}}value of rho if {cmd:rhotype("Fixed")}{p_end}
+{synopt:{cmd:e(fixed_gamma)}}value of gamma if {cmd:fixgamma}{p_end}
+{synopt:{cmd:e(report_rate)}}reporting rate if {cmd:underreporting_correction} - not currently available{p_end}
+
 
 {synoptset 20 tabbed}{...}
 {p2col 5 20 24 2: Macros}{p_end}
 {synopt:{cmd:e(cmd)}}{cmd:smle}{p_end}
-{synopt:{cmd:e(depvar)}}name of dependent variable{p_end}
+{synopt:{cmd:e(cmdline)}}the full command line as called{p_end}
+{synopt:{cmd:e(rhotype)}}rho type{p_end}
+{synopt:{cmd:e(simulator_type)}}simulator{p_end}
 {synopt:{cmd:e(title)}}{cmd:SMLE model}{p_end}
 {synopt:{cmd:e(properties)}}{cmd:b V}{p_end}
+{synopt:{cmd:e(depvar)}}name of dependent variable{p_end}
 
 {synoptset 20 tabbed}{...}
 {p2col 5 20 24 2: Matrices}{p_end}
