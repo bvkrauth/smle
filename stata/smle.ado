@@ -22,21 +22,28 @@ program define smle, eclass
 			local `opt' ".true."
 		}
 	}
-	*** Optional strings
-	if "`simulator'" == "" {
-		local simulator "ghk"
-	}
-	if "`optimizer'" == "" {
-		local optimizer "dfp"
-	}
-	if "`vce'" == "" {
-		local vce "none"
-	}
-	if "`equilibrium'" == "" {
-		local equilibrium "low"
-	}
-	if "`rhotype'" == "" {
-		local rhotype "x"
+	*** Optional names
+	local valid_equilibrium "low high random plot bounds minimum"
+	local valid_rhotype "x fixed estimate interval"
+	local valid_simulator "ghk hybrid"
+	local valid_optimizer "dfp sa"
+	local valid_vce "none opg hessian"
+	foreach opt in equilibrium rhotype simulator optimizer vce {
+		local propt = proper("``opt''")
+		local prvalid = proper("`valid_`opt''")
+		gettoken default : prvalid
+		if "`propt'" == "" {
+			local propt "`default'"
+		}
+		scalar bkmatch = strpos("`prvalid'","`propt'")
+		if (bkmatch > 0) {
+			local `opt' = substr("`valid_`opt''",bkmatch,.)
+			gettoken `opt' : `opt'
+		}
+		else {
+			di as error "Invalid `opt' = ``opt'' (valid: `valid_`opt'')"
+			error 198
+		}
 	}
 	** Check arguments for validity
 	*** Numerical arguments 
@@ -66,32 +73,12 @@ program define smle, eclass
 		error 198
 	}
 	*** String arguments 
-	if !inlist(upper(substr("`equilibrium'",1,1)), "L","H","R","B","P","M") { 
-		di as error "Invalid value for equilibrium: `equilibrium' (should be Low, High, Random, Bounds, Plot or Minimum)"
-		error 198
-	}
-	if (("`execute'" == "") & inlist(upper(substr("`equilibrium'",1,1)), "B","P","M")) {
+	if (("`execute'" == "") & inlist("`equilibrium'", "bounds","plot","minimum")) {
 		di as error "Cannot execute for equilibrium = `equilibrium'"
 		error 198
 	}
-	if !inlist(upper(substr("`rhotype'",1,1)), "X","F","E","I") { 
-		di as error "Invalid value for rhotype: `rhotype' (should be X, Fixed, Estimate, or Interval)"
-		error 198
-	}
-	if (("`execute'" == "") & inlist(upper(substr("`rhotype'",1,1)), "I")) {
+	if (("`execute'" == "") & inlist("`rhotype'", "interval")) {
 		di as error "Cannot execute for rhotype = `rhotype'"
-		error 198
-	}
-	if !inlist(upper(substr("`simulator'",1,1)), "G", "H") { 
-		di as error "Invalid value for simulator: `simulator' (should be GHK or Hybrid)"
-		error 198
-	}
-	if !inlist(upper(substr("`optimizer'",1,1)), "D", "S") { 
-		di as error "Invalid value for optimizer: `optimizer' (should be DFP or SA)"
-		error 198
-	}
-	if !inlist(upper(substr("`vce'",1,1)), "N", "H","O") { 
-		di as error "Invalid value for vce: `vce' (should be None, Hessian or OPG)"
 		error 198
 	}
 	*** Variable lists 
@@ -315,7 +302,6 @@ program define smle, eclass
 		}
 		else {
 			local peeravg "gamma"
-			quietly cd ..
 		}
 		mkmat loglik `peeravg' `aggregate' `xvars' cons rhox rhoe, matrix(b)
 		restore

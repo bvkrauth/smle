@@ -26,6 +26,11 @@ if (strpos("`0'","clear") > 0) {
 smle own pop , peeravg(peeravg) npeers(npeers) replace `execute'
 estimates store basic
 
+
+/* Basic usage, group-based sample */
+smle own pop, groupid(region) replace `execute'
+estimates store group
+
 /* Basic usage, no execution */
 smle own pop , peeravg(peeravg) npeers(npeers) replace noexecute
 confirm file "parm.txt"
@@ -78,8 +83,7 @@ estimates store numagg_1
 /* Set simulator type */
 /* Valid options: G(HK) H(ybrid - only first letter matters*/
 rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace simulator(invalid)"' == 198
-smle own pop , peeravg(peeravg) npeers(npeers) replace simulator(gnome) noexecute
-smle own pop , peeravg(peeravg) npeers(npeers) replace simulator(ghk) noexecute
+smle own pop , peeravg(peeravg) npeers(npeers) replace simulator(g) noexecute
 smle own pop , peeravg(peeravg) npeers(npeers) replace simulator(hybrid) `execute'
 estimates store hybrid
 
