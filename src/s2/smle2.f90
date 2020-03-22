@@ -123,8 +123,10 @@ contains
              FSTAR = fret ! ...then save that result
              BSTAR = b
           end if
-          call runif(shift)
-          b = 2.0_dp*shift*b ! Generate a random (but not crazy) starting point for restart.
+          if (i > 1) then
+             call runif(shift)
+             b = 2.0_dp*shift*b ! Generate a random (but not crazy) starting point for restart.
+          end if
        end do
     else
        open(unit=1,file=SMGLOBAL%LOGFILE,iostat=ios,action="write",position="append",status="old")

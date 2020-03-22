@@ -697,8 +697,10 @@ contains
              fstar = fret ! ...then save that result
              bstar = b
           end if
-          call runif(c)
-          b = 2.0_dp*c*b ! Generate a random (but not crazy) starting point for restart.
+          if (i > 1) then
+             call runif(c)
+             b = 2.0_dp*c*b ! Generate a random (but not crazy) starting point for restart.
+          end if
        end do
     else
        open(unit=1,file=SMGLOBAL%LOGFILE,iostat=ios,action="write",position="append",status="old")
