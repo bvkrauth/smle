@@ -4,6 +4,7 @@ sysuse census, clear
 
 gen own = (popurban > 3328253)
 gen npeers = region
+set seed 339487731
 gen peeravg = round(runiform()*region)/region
 gen zero = 0
 gen one = 1
@@ -22,10 +23,38 @@ if (strpos("`0'","clear") > 0) {
 	capture erase "smle_tmp\data.txt"
 }
 
+/* Confirm that SMLE calculation is stable */
+smle own pop , peeravg(peeravg) npeers(npeers) restarts(1) ufile(".\testing\indu.txt") 
+estimates store indstable
+qui {
+mat T_b = J(1,5,0)
+mat T_b[1,1] =   .108166016638279
+mat T_b[1,2] =  2.80907215711e-07
+mat T_b[1,3] = -1.633952379226685
+mat T_b[1,4] =  .0111995115876198
+mat T_b[1,5] =  .0111995115876198
+}
+matrix C_b = e(b)
+assert mreldif( C_b , T_b ) < 1E-8
+
+/* Confirm that S2 calculation is stable */
+* smle own pop , groupid(region) restarts(1) save("s2test")
+smle own pop , groupid(region) restarts(1) ufile(".\testing\grpu.txt")
+estimates store grstable
+qui {
+mat T_b = J(1,5,0)
+mat T_b[1,1] =  .3889549374580383
+mat T_b[1,2] =  2.98495479001e-07
+mat T_b[1,3] =  -2.06155252456665
+mat T_b[1,4] = -.0618750564754009
+mat T_b[1,5] = -.0618750564754009
+}
+matrix C_b = e(b)
+assert mreldif( C_b , T_b ) < 1E-8
+
 /* Basic usage */
 smle own pop , peeravg(peeravg) npeers(npeers) replace `execute'
 estimates store basic
-
 
 /* Basic usage, group-based sample */
 smle own pop, groupid(region) replace `execute'
