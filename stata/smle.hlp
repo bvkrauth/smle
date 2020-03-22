@@ -36,7 +36,7 @@
 	{cmd:high}, {cmd:random}, {cmd:bounds}, {cmd:minimum}, and {cmd:plot}
 {p_end}
 {synopt :{opt und:erreporting}}include underreporting correction{p_end}
-{synopt :{opt cov:mat(string)}}under construction{p_end}
+{synopt :{opth vce(vcetype)}}under construction{p_end}
 
 {syntab:Simulation/optimization}
 {synopt :{opt ns:im(#)}}number of simulations; default is 100.  {p_end}
@@ -132,7 +132,7 @@ these variables will not be included in the calculation of rho_x.
 {p_end}
 
 {phang}
-{opt covmat(string)} is under construction.
+{opt vce(vcetype)} is under construction.
 {p_end}
 
 

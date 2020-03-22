@@ -11,7 +11,7 @@ program define smle, eclass
 		reals: */ rho(real 0.0) GAMma(real 0.0) /*
 		optionally_on: */ FIXGamma UNDerreporting replace /*
 		optionally_off: */ noEXEcute /*
-		strings: */ EQuilibrium(name) RHOType(name) SIMulator(name) OPTimizer(name) COVmat(name) save(string) Ufile(string) ]
+		strings: */ EQuilibrium(name) RHOType(name) SIMulator(name) OPTimizer(name) vce(name) save(string) Ufile(string) ]
 	** Add defaults 
 	*** Optionally on 
 	foreach opt in fixgamma underreporting {
@@ -29,8 +29,8 @@ program define smle, eclass
 	if "`optimizer'" == "" {
 		local optimizer "dfp"
 	}
-	if "`covmat'" == "" {
-		local covmat "none"
+	if "`vce'" == "" {
+		local vce "none"
 	}
 	if "`equilibrium'" == "" {
 		local equilibrium "low"
@@ -43,6 +43,15 @@ program define smle, eclass
 	if (`restarts' < 0) { 
 		di as error "Invalid value for restarts: `restarts' (must be >= 0)"
 		error 198
+	}
+	if ("`groupid'" == "") {
+		if (`restarts' == 0) {
+			local optimizer "sa"
+		}
+		if (inlist(upper(substr("`optimizer'",1,1)),"S")) & (`restarts' > 0) {
+			di "optimizer = sa, restarts set to zero"
+			local restarts "0"
+		}
 	}
 	if (`nsim' < 1) { 
 		di as error "Invalid value for nsim: `nsim' (must be >= 1)"
@@ -79,6 +88,10 @@ program define smle, eclass
 	}
 	if !inlist(upper(substr("`optimizer'",1,1)), "D", "S") { 
 		di as error "Invalid value for optimizer: `optimizer' (should be DFP or SA)"
+		error 198
+	}
+	if !inlist(upper(substr("`vce'",1,1)), "N", "H","O") { 
+		di as error "Invalid value for vce: `vce' (should be None, Hessian or OPG)"
 		error 198
 	}
 	*** Variable lists 
@@ -252,13 +265,13 @@ program define smle, eclass
 		file write fh "NSIM: number of simulations to use in calculating estimated loglikelihood" _newline
 		file write fh "`nsim'" _newline
 		file write fh "SEARCH_METHOD: DFP or SA" _newline
-		file write fh "DFP" _newline /* UPDATE THIS! */
+		file write fh "`optimizer'" _newline 
 		file write fh "RESTARTS: number of times to run search algorithm" _newline
 		file write fh "`restarts'" _newline
 		file write fh "EQUILIBRIUM_TYPE: equilibrium selection rule, either low, random, or high" _newline
 		file write fh "`equilibrium'" _newline
 		file write fh "COVMAT_TYPE: OPG, Hessian or None" _newline
-		file write fh "None" _newline /* UPDATE THIS! */  
+		file write fh "`vce'" _newline   
 		file write fh "RHO_TYPE:" _newline
 		file write fh "`rhotype'" _newline
 		file write fh "FIXED_RHO: value to fix rho_e at if RHO_TYPE=Fixed" _newline
@@ -316,8 +329,8 @@ program define smle, eclass
 		matrix colnames V = `bnames'
 		ereturn post b V, depname(`own_choice') obs(`nobs') esample(`touse')
 		ereturn local title "SMLE estimates"
-		ereturn local simulator "`simulator_type'"
-		ereturn local equilibrium_type "`equilibrium_type'"
+		ereturn local simulator "`simulator'"
+		ereturn local equilibrium "`equilibrium'"
 		ereturn local rhotype "`rhotype'"
 		ereturn scalar loglik = loglik
 		ereturn scalar nsim = `nsim'
