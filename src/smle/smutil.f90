@@ -455,7 +455,7 @@ contains
        else ! generate random numbers with rhalt
           call runif(shift)
           u=transpose(rhalt(nsim,maxgroupsize,shift))
-          open(unit=1,file=ufile,iostat=ios,form="formatted",action="write",status="replace")
+          open(unit=1,file=ufile,iostat=ios,form="formatted",action="write",status="replace",recl=32767)
           if (ios == 0) then
              do i=1,nsim
                 write (unit=1,iostat=ios,fmt=*) u(:,i)
