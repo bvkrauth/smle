@@ -1,5 +1,8 @@
 \documentclass{article}
+\usepackage{hyperref}
 
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
 \addtolength{\hoffset}{-1in}
 \addtolength{\textwidth}{1.5in}
 \addtolength{\voffset}{-0.5in}
@@ -10,7 +13,7 @@
 \title{Computer programs for simulation-based estimation of peer effects}
 \author{Brian Krauth \\
 	Simon Fraser University}
-\date{Version 2.0 - (RELEASE DATE???)}
+\date{Version 1.2 - (March 2020)}
 	
 \maketitle
 
@@ -18,43 +21,61 @@ This file is the documentation for a set of computer programs
 I have written to implement the structural estimation method
 described in my paper ``Simulation-based estimation of peer effects'' \cite{smle}.
 
-\section{Installation and use}
+\section{Installation}
 
-\subsection{Installation}
+Version 1.2 is available at 
+\url{https://github.com/bvkrauth/smle/releases/tag/v1.2}
 
-To install the programs, simply unzip the file {\tt smle.zip} into a directory of your choice.  
-This will create 4 subdirectories:
+Future updates will be available at \url{https://github.com/bvkrauth/smle}.
+
+\subsection{Windows Installation- Stata (NEW)}
+
+If you are running Windows and have Stata, you can install and 
+use the Stata package {\tt smle} by running the command:
+\begin{verbatim}
+. net install smle, from("http://www.sfu.ca/~bkrauth/code")
+\end{verbatim}
+Once the package is installed, you can access {\tt help smle}
+and ignore the rest of this document.
+
+\subsection{Windows Installation - binaries}
+
+If you do not have Stata, you can install and run the binary files directly. 
+There are two estimation programs:
 \begin{itemize}
-	\item {\tt windows-binaries}: contains Windows executable files.  
-		There are two estimation programs:
-		\begin{itemize}
-			\item {\tt smle.exe:} Estimates structural model from an individual-based sample.
-			\item {\tt s2.exe:} Estimates structural model from a group-based sample.
-		\end{itemize}
-		and two support programs:
-		\begin{itemize}
-			\item {\tt probit.exe:} Estimates a standard (naive) probit model from an individual-based or group-based
-			sample.
-			\item {\tt psim.exe:} Generates simulated data from the model for use in Monte Carlo experiments.
-		\end{itemize}
-		All four of these programs are self-contained, and can be copied to and run
-		from any directory.
-	\item {\tt doc}: contains documentation, including this file.
-	\item {\tt examples}: contains examples.
-	\item {\tt code}: contains the source code.
+	\item {\tt smle.exe:} Estimates structural model from an individual-based sample.
+	\item {\tt s2.exe:} Estimates structural model from a group-based sample.
 \end{itemize}
+To install the programs, simply copy them into a directory of your choice.  
+Both programs are self-contained, and can be copied to and run
+from any directory.
 
-\subsection{Basic use}
+\subsection{Installation in other operating systems}
 
-To use any of the programs, you first need to create two input files:
-\begin{itemize}
-	\item A {\it data} file, i.e., a text file containing the 
-		data set from which you are estimating the model.
-	\item A {\it parameter} file, i.e., a text file describing
-		your preferred settings for the various user options.  
-\end{itemize}
-The format of the data and parameter files varies across the 4 programs.
-Details on how to construct these files can be found in Sections \ref{sec:smle}-\ref{sec:psim}.
+If you have a modern Fortran compiler (i.e., one that can compile Fortran 90/95), 
+the source code can be compiled directly.  This allows for use under Linux and other 
+operating systems, and allows for the modification of code when needed.  
+See Appendix~\ref{sec:compiling} for details.
+
+
+\section{Basic use}
+
+Both {\tt smle} and {\tt s2} run from the command prompt and perform the following
+steps:
+\begin{enumerate}
+	\item Read in two text files:
+		\begin{itemize}
+			\item A {\bf parameter file}, i.e., a text file describing
+				your preferred settings for the various user options.  
+			\item A {\bf data file}, i.e., a text file containing the 
+				data set from which you are estimating the model.
+	\end{itemize}
+	\item Perform calculations, logging the process in a {\bf log file}.
+	\item Write the results to a {\bf results file}.
+\end{enumerate}
+To use any of the programs, you first need to create the two input files.
+The format of the parameter and data files varies by program.
+Details on how to construct these files can be found in Sections \ref{sec:smle} through \ref{sec:psim}.
 
 Once you have created the data and parameter files, place the program you wish
 to use in the same directory, open a Windows command prompt in that directory
@@ -88,12 +109,6 @@ create output files {\tt ex1\_log.txt} and {\tt ex1\_results.txt}.
 The contents of both the parameter file and the output files
 will be discussed in Section \ref{sec:smle}.
 
-\subsection{Advanced use}
-
-If you have a modern Fortran compiler (i.e., one that can compile Fortran 90/95), 
-the source code can be compiled directly.  This allows for use under Linux and other 
-operating systems, and allows for the modification of code when needed.  
-See Appendix~\ref{sec:compiling} for details.
 
 \section{Using the {\tt smle} program }\label{sec:smle}
 
@@ -747,7 +762,7 @@ Compiling is a matter of following these steps:
 
 \begin{itemize}
 	\item Version 1.1 - March 1, 2005. First publicly released version.
-	\item Version 2.0 - ???.
+	\item Version 1.1.1 - March 16, 2020.
 		\begin{itemize}
 			\item Windows binaries are now compiled on Intel Fortran compiler, leading to 
 				a 43\% reduction in program time for SMLE.EXE and a 16\% reduction
@@ -761,7 +776,12 @@ Compiling is a matter of following these steps:
 					\item Stack overflow error repaired.  
 				\end{itemize}
 			\item Program (windows binary version) can now take user-supplied name of parameter file.  
-					Previous version only	allowed the parameter file to be named ``parm.dat''.  
+					Previous version only allowed the parameter file to be named ``parm.dat''.  
+		\end{itemize}
+	\item Version 1.2 - March 23, 2020
+		\begin{itemize}
+			\item Added Stata wrapper for both SMLE.EXE and S2.EXE.
+			\item Bug fixes
 		\end{itemize}
 \end{itemize}
 
