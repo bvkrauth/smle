@@ -15,8 +15,6 @@ G WIN32 smle.exe
 G WIN32 s2.exe
 G WIN64 smle.exe
 G WIN64 s2.exe
-h smle.exe
-h s2.exe
 f smle_example.do
 
 e
