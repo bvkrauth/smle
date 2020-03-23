@@ -1,0 +1,23 @@
+v 3
+d 'SMLE': module for simulation-based estimation of peer effects based on model in Krauth (2006)
+d
+d Brian Krauth, Simon Fraser University
+d Mohsen Javdani Haji, Simon Fraser University
+d
+d The model is described in the paper 
+d "Simulation-based estimation of peer effects", Journal of Econometrics 2006.
+d
+d Version: 1.2
+d Distribution-Date:  23mar2020
+
+f smle.ado
+f smle.hlp
+G WIN32 smle.exe
+G WIN32 s2.exe
+G WIN64 smle.exe
+G WIN64 s2.exe
+h smle.exe
+h s2.exe
+f smle_example.do
+
+e

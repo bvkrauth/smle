@@ -1,7 +1,9 @@
+/* Stata do-file for demonstrating and testing the smle package */
 discard
 clear
 sysuse census, clear
 
+/* Generate some fake data */
 gen own = (popurban > 3328253)
 gen npeers = region
 set seed 339487731
@@ -12,10 +14,13 @@ gen oneandahalf = 1.5
 quietly probit own peeravg pop
 estimates store probit
 
+/* If this do-file is run with no arguments, Stata will skip the estimation step for most examples to save time */
+/* If the "execute" argument is included, Stata will actually estimate all of the models */
 if (strpos("`0'","execute") == 0) {
 	local execute "noexecute"
 }
 
+/* If the "clear" argument is included, Stata will delete some local intermediate files to ensure clean execution */
 if (strpos("`0'","clear") > 0) {
 	capture erase "parm.txt"
 	capture erase "data.txt"
@@ -24,33 +29,40 @@ if (strpos("`0'","clear") > 0) {
 }
 
 /* Confirm that SMLE calculation is stable */
-smle own pop , peeravg(peeravg) npeers(npeers) restarts(1) ufile(".\testing\indu.txt") 
-estimates store indstable
-qui {
-mat T_b = J(1,5,0)
-mat T_b[1,1] =   .108166016638279
-mat T_b[1,2] =  2.80907215711e-07
-mat T_b[1,3] = -1.633952379226685
-mat T_b[1,4] =  .0111995115876198
-mat T_b[1,5] =  .0111995115876198
+/* This requires that we have the data file .\testing\indu.txt */
+capture confirm file ".\testing\indu.txt"
+if {_rc == 0) {
+	smle own pop , peeravg(peeravg) npeers(npeers) restarts(1) ufile(".\testing\indu.txt") 
+	estimates store indstable
+	qui {
+	mat T_b = J(1,5,0)
+	mat T_b[1,1] =   .108166016638279
+	mat T_b[1,2] =  2.80907215711e-07
+	mat T_b[1,3] = -1.633952379226685
+	mat T_b[1,4] =  .0111995115876198
+	mat T_b[1,5] =  .0111995115876198
+	}
+	matrix C_b = e(b)
+	assert mreldif( C_b , T_b ) < 1E-8
 }
-matrix C_b = e(b)
-assert mreldif( C_b , T_b ) < 1E-8
 
 /* Confirm that S2 calculation is stable */
-* smle own pop , groupid(region) restarts(1) save("s2test")
-smle own pop , groupid(region) restarts(1) ufile(".\testing\grpu.txt")
-estimates store grstable
-qui {
-mat T_b = J(1,5,0)
-mat T_b[1,1] =  .3889549374580383
-mat T_b[1,2] =  2.98495479001e-07
-mat T_b[1,3] =  -2.06155252456665
-mat T_b[1,4] = -.0618750564754009
-mat T_b[1,5] = -.0618750564754009
+/* This requires that we have the data file .\testing\grpu.txt */
+capture confirm file ".\testing\grpu.txt"
+if {_rc == 0) {
+	smle own pop , groupid(region) restarts(1) ufile(".\testing\grpu.txt")
+	estimates store grstable
+	qui {
+	mat T_b = J(1,5,0)
+	mat T_b[1,1] =  .3889549374580383
+	mat T_b[1,2] =  2.98495479001e-07
+	mat T_b[1,3] =  -2.06155252456665
+	mat T_b[1,4] = -.0618750564754009
+	mat T_b[1,5] = -.0618750564754009
+	}
+	matrix C_b = e(b)
+	assert mreldif( C_b , T_b ) < 1E-8
 }
-matrix C_b = e(b)
-assert mreldif( C_b , T_b ) < 1E-8
 
 /* Basic usage, individual-based sample */
 smle own pop , peeravg(peeravg) npeers(npeers) replace `execute'
@@ -176,16 +188,6 @@ estimates store under
 /* Not available for group-based sample */
 rcof "noisily smle own pop , groupid(region) replace underreporting noexecute" == 198
 
-/* Set vcetype (under construction) */
-/* Indvidual sample: only valid value is none */
-* rcof "noisily smle own pop , peeravg(peeravg) npeers(npeers) replace vce(opg) noexecute" == 198
-* rcof "noisily smle own pop , peeravg(peeravg) npeers(npeers) replace vce(hessian) noexecute" == 198
-/* Group-based sample: valid includes none, opg, hessian */
-* rcof "noisily smle own pop , groupid(region) replace vce(invalid) `execute'" == 198
-* smle own pop , groupid(region) replace vce(none) noexecute
-* smle own pop , groupid(region) replace vce(opg) noexecute
-* smle own pop , groupid(region) replace vce(hessian) noexecute
-
 /* Set simulator */
 /* Valid options: ghk, hybrid - I'm pretty sure GHK only works with Low + individual-based sample */
 rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace simulator(invalid)"' == 198
@@ -221,9 +223,7 @@ estimates store gsa
 /* Set restarts (integer, minimum 0) */
 rcof "noisily smle own pop , peeravg(peeravg) npeers(npeers) restarts(-1)" == 198
 rcof "noisily smle own pop , peeravg(peeravg) npeers(npeers) restarts(2.5)" == 198
-/* We already used restarts(1) above */
-* smle own pop , peeravg(peeravg) npeers(npeers) replace restarts(0) `execute'
-* estimates store restarts_0
+/* We already used restarts(1) above, so no need to test it */
 
 est table *, b(%9.3f) se title(`"execute = "`execute'" "') equations(1)
 
