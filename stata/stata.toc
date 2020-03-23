@@ -1,0 +1,6 @@
+v 3
+d Stata programs by Brian Krauth, Department of Economics, Simon Fraser University
+d Web: http://www.sfu.ca/~bkrauth 
+d Email: bkrauth@sfu.ca
+
+p smle Stata program for SMLE model estimation
