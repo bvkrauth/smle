@@ -46,6 +46,20 @@ program define smle, eclass
 		}
 	}
 	** Check arguments for validity
+	*** Variable lists 
+	if ("`groupid'" == "" & ("`npeers'" == "" | "`peeravg'" == "")) {
+		di as error "Cannot determine peer choice:you must specify groupid OR npeers and peeravg
+		error 198
+	}
+	if ("`groupid'" != "" & ("`npeers'" != "" | "`peeravg'" != "")) {
+		di as error "Cannot specify npeers or peeravg if you specify groupid 
+		error 198
+	}
+	*** On/off options 
+	if ("`groupid'" != "") & ("`underreporting'" == ".true." ) {
+		di as error "Cannot use underreporting if you specify groupid "
+		error 198
+	}
 	*** Numerical arguments 
 	if (`restarts' < 0) { 
 		di as error "Invalid value for restarts: `restarts' (must be >= 0)"
@@ -79,11 +93,6 @@ program define smle, eclass
 	}
 	if (("`execute'" == "") & inlist("`rhotype'", "interval")) {
 		di as error "Cannot execute for rhotype = `rhotype'"
-		error 198
-	}
-	*** Variable lists 
-	if ("`groupid'" == "" & ("`npeers'" == "" | "`peeravg'" == "")) {
-		di as error "Cannot determine peer choice:you must specify groupid OR npeers and peeravg
 		error 198
 	}
 	** Find/create folders and files
@@ -297,16 +306,18 @@ program define smle, eclass
 		di "DONE." _newline 
 		preserve
 		quietly infile loglik rhox rhoe gamma cons `aggregate' `xvars' using "`resultfile'", clear
+		list
 		if ("`groupid'" == "") {
 			rename gamma `peeravg'
 		}
 		else {
 			local peeravg "gamma"
 		}
-		mkmat loglik `peeravg' `aggregate' `xvars' cons rhox rhoe, matrix(b)
+		mkmat loglik `peeravg' `aggregate' `xvars' cons rhox rhoe, matrix(bv)
 		restore
-		scalar loglik = b[1,1]
-		matrix b = b[1,2..colsof(b)]
+		matlist bv
+		scalar loglik = bv[1,1]
+		matrix b = bv[1,2..colsof(bv)]
 		local cons = colsof(b) - 2
 		matname b _cons , columns(`cons')
 		local bnames : colnames b

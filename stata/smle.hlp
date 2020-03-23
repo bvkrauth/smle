@@ -21,11 +21,14 @@
 {synoptset 30 tabbed}{...}
 {synopthdr}
 {synoptline}
-{syntab:Model}
-{synopt :{opth gr:oupid(varname)}}variable identifying the peer group (if group-based sample){p_end}
-{synopt :{opth peer:avg(varname)}}variable describing peer average choice (if individual-based sample){p_end}
-{synopt :{opth np:eers(varname)}}variable describing number of peers (if individual-based sample){p_end}
+{syntab:Required for group-based sample}
+{synopt :{opth gr:oupid(varname)}}variable identifying the peer group{p_end}
 
+{syntab:Required for individual-based sample}
+{synopt :{opth np:eers(varname)}}variable describing number of peers{p_end}
+{synopt :{opth peer:avg(varname)}}variable describing average choice of peers{p_end}
+
+{syntab:Model}
 {synopt :{opth agg:gregate(varlist)}}additional aggregate control variables (will not be used to estimate rho_x){p_end}
 {synopt :{opt rhot:ype(rt)}}rule for calculating cross-peer correlation in unobservables (rho_e);
 	options are {cmd:x} (the default}, {cmd:fixed}, {cmd:estimate}, and {cmd:interval} {p_end}
@@ -36,14 +39,15 @@
 	{cmd:high}, {cmd:random}, {cmd:bounds}, {cmd:minimum}, and {cmd:plot}
 {p_end}
 {synopt :{opt und:erreporting}}include underreporting correction{p_end}
-{synopt :{opth vce(vcetype)}}under construction{p_end}
 
-{syntab:Simulation/optimization}
-{synopt :{opt ns:im(#)}}number of simulations; default is 100.  {p_end}
-{synopt :{opt rest:arts(#)}}number of restarts for DFP optimizer; default is 3{p_end}
+{syntab:Simulation}
 {synopt :{opt sim:ulator(sim)}}simulator; options are {cmd:ghk} (default) or {cmd:hybrid} {p_end}
+{synopt :{opt ns:im(#)}}number of simulations; default is 100.  {p_end}
+{synopt :{opt ufile(string)}}name of optional file providing random numbers{p_end}
+
+{syntab:Optimization}
 {synopt :{opt opt:imizer(opt)}}optimization method; options are {cmd:dfp} (default) or {cmd:sa}  {p_end}
-{synopt :{opt ufile(string)}}under construction{p_end}
+{synopt :{opt rest:arts(#)}}number of restarts for DFP optimizer; default is 3{p_end}
 
 {syntab:Execution/system}
 {synopt :{opt noexe:cute}}do not estimate model{p_end}
@@ -82,7 +86,7 @@ Use Stata's {help bootstrap} prefix to get standard errors, confidence intervals
 
 {title:Options}
 
-{dlgtab:Model}
+{dlgtab:Required}
 
 {phang}
 {opth groupid(varname)} identifies the group ID, if you have a group-based sample. If {cmd: groupid} is provided,
@@ -98,18 +102,20 @@ both {cmd:peeravg} and {cmd:npeers} must be provided.
 {opth npeers(varname)} provides the number of peers used to construct {cmd:peeravg}, if you have an individual-based sample.
 {p_end}
 
+{dlgtab:Model}
+
 {phang}
 {opth aggregate(varlist)} provides additional control variables to include in the model. Unlike the variables in {it:controlvars},
 these variables will not be included in the calculation of rho_x.
 {p_end}
 
 {phang}
-{opt rhotype(string)} allows alternative ways of estimating the within-peer-group correlation in unobservables (rho_e).
-	Options include X, Fixed, Estimate, and Interval. Interval is not currently supported within Stata.
+{opt rhotype(rt)} allows alternative ways of estimating the within-peer-group correlation in unobservables (rho_e).
+	Options include {cmd: x} (the default), {cmd: fixed}, {cmd:estimate}, and {cmd:interval}. {cmd:interval} is not currently supported within Stata.
 {p_end}
 
 {phang}
-{opt rho(#)} sets the fixed value for rho_e. It only applies if {cmd:rhotype("Fixed")}.
+{opt rho(#)} sets the fixed value for rho_e. It only applies if {cmd:rhotype(fixed)}.
 {p_end}
 
 {phang}
@@ -121,9 +127,9 @@ these variables will not be included in the calculation of rho_x.
 {p_end}
 
 {phang}
-{opt equilibrium(string)} allows the user to set the equilibrium selection rule. Options include
-	Low (the default), High, Random, Bounds, Plot and Minimum. Bounds, Plot and Minimum are not 
-	currently supported within Stata.
+{opt equilibrium(eq)} allows the user to set the equilibrium selection rule. Options include
+	{cmd:low} (the default), {cmd:high}, {cmd:random}, {cmd:bounds}, {cmd:minimum}, and {cmd:plot}. 
+	Options {cmd:bounds}, {cmd:minimum}, and {cmd:plot } are not currently supported within Stata.
 {p_end}
 
 {phang}
@@ -131,12 +137,11 @@ these variables will not be included in the calculation of rho_x.
 	See Krauth (2006) for details.
 {p_end}
 
+{dlgtab:Simulation}
+
 {phang}
-{opt vce(vcetype)} is under construction.
+{opt simulator(sim)} specifies the simulator to be used. Options are {cmd:ghk} (the default) and {cmd:hybrid}.
 {p_end}
-
-
-{dlgtab:Simulation/optimization}
 
 {phang}
 {opt nsim(#)} specifies the number of simulations used to approximate the likelihod function. 
@@ -144,36 +149,35 @@ The default is 100.
 {p_end}
 
 {phang}
-{opt restarts(#)} specifies the number of restarts for the Davidson-Fletcher-Powell (DFP) optimizer. The default is 3.
+{opt ufile(string)} is a programmer's option to reuse previously-generated random numbers
+	for testing purposes. 
+{p_end}
+
+{dlgtab:Optimization}
+
+{phang}
+{opt optimizer(opt)} specifies the otpimization method to be used. Options are {cmd:dfp} (the default) and {cmd:sa}.
 {p_end}
 
 {phang}
-{opt simulator(string)} specifies the simulator to be used. Options are GHK (the default) and Hybrid.
-{p_end}
-
-{phang}
-{opt optimizer(string)} specifies the otpimization method to be used. Options are DFP (the default) and SA.
-{p_end}
-
-{phang}
-{opt ufile(string)} is under construction.
+{opt restarts(#)} specifies the number of restarts for {cmd:optimizer(dfp)}. The default is 3.
 {p_end}
 
 {dlgtab:Execution/system}
 
 {phang}
+{opt save(string)} identifies a folder in which to save intermediate files. 
+{p_end}
+
+{phang}
 {opt noexecute} tells {cmd:smle} not to run the Fortran program to generate estimates. Instead, 
-the intermediate files are saved so that the user can run the Fortran program separately.
+the intermediate files needed to run the Fortran program are saved, either in the 
+folder specified with the {cmd:save} option, or in the working directory. The user
+can then run the Fortran program by hand.
 {p_end}
 
 {phang}
-{opt save(string)} identifies a folder in which to save intermediate files. If {cmd:save} is
-not provided, intermediate files will be saved in the working directory (if {cmd:noexecute})
-or in temporary files (otherwise).
-{p_end}
-
-{phang}
-{opt replace} permits {cmd:smle} to overwrite existing files.
+{opt replace} permits {cmd:smle} to overwrite existing files. 
 {p_end}
 
 {title:Examples:}
