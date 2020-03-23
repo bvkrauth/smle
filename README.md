@@ -16,11 +16,10 @@ net install smle, from("http://www.sfu.ca/~bkrauth/code")
 ```
 To see how the command works, you can call  `help smle`
 
-The current developmental version can be obtained from this site by executing the Stata command:
-
-```stata
-net install smle, from("https://raw.githubusercontent.com/bvkrauth/smle/master/stata/")
-```
+The current developmental version can be obtained from this site by downloading
+the relevant files from https://github.com/bvkrauth/smle/tree/master/stata 
+and placing them in your working directory, the PLUS
+directory or the PERSONAL directory.
 
 ### Binaries only
 
