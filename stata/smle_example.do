@@ -22,6 +22,8 @@ if (strpos("`0'","execute") == 0) {
 
 /* If the "clear" argument is included, Stata will delete some local intermediate files to ensure clean execution */
 if (strpos("`0'","clear") > 0) {
+	capture erase "check.dat"
+	capture erase "check.lock"
 	capture erase "parm.txt"
 	capture erase "data.txt"
 	capture erase "smle_tmp\parm.txt"
@@ -31,7 +33,7 @@ if (strpos("`0'","clear") > 0) {
 /* Confirm that SMLE calculation is stable */
 /* This requires that we have the data file .\testing\indu.txt */
 capture confirm file ".\testing\indu.txt"
-if {_rc == 0) {
+if (_rc == 0) {
 	smle own pop , peeravg(peeravg) npeers(npeers) restarts(1) ufile(".\testing\indu.txt") 
 	estimates store indstable
 	qui {
@@ -49,7 +51,7 @@ if {_rc == 0) {
 /* Confirm that S2 calculation is stable */
 /* This requires that we have the data file .\testing\grpu.txt */
 capture confirm file ".\testing\grpu.txt"
-if {_rc == 0) {
+if (_rc == 0) {
 	smle own pop , groupid(region) restarts(1) ufile(".\testing\grpu.txt")
 	estimates store grstable
 	qui {
@@ -115,8 +117,8 @@ rcof "noisily smle own pop, peeravg(peeravg) npeers(npeers) aggregate(one)" == 4
 rcof "noisily smle own pop, peeravg(peeravg) npeers(npeers) aggregate(pop)" == 459  
 smle own pop , peeravg(peeravg) npeers(npeers) replace aggregate(popurban) `execute'
 estimates store numagg_1
-smle own pop , groupid(region) replace aggregate(popurban) `execute'
-estimates store gnumagg_1
+* smle own pop , groupid(region) replace aggregate(popurban) `execute'
+* estimates store gnumagg_1
 
 /* Set rhotype and rho */
 /* Valid options: x, fixed, estimate, interval */
@@ -132,16 +134,16 @@ rcof "noisily smle own pop , peeravg(peeravg) npeers(npeers) replace rho(-2)" ==
 smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype(fixed) rho(0.2) noexecute
 smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype(fixed) `execute'
 estimates store rho_0
-smle own pop , groupid(region) replace rhotype(fixed) `execute'
+smle own pop , groupid(region) replace rhotype(fixed) noexecute
 estimates store grho_0
 /* rhotype(estimate) estimates rho directly */
 smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype(estimate) `execute'
 estimates store rho_estimate
-smle own pop , groupid(region) replace rhotype(estimate) `execute'
+smle own pop , groupid(region) replace rhotype(estimate) noexecute
 estimates store grho_estimate
 /* rhotype(interval) is not yet supported with execution */
-rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype(interval) execute"' == 198
-rcof `"noisily smle own pop , groupid(region) replace rhotype(interval) execute"' == 198
+rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype(interval)"' == 198
+rcof `"noisily smle own pop , groupid(region) replace rhotype(interval)"' == 198
 smle own pop , peeravg(peeravg) npeers(npeers) replace rhotype(interval) noexecute /* RUNS BUT ONLY READS FIRST ROW */
 smle own pop , groupid(region) replace rhotype(interval) noexecute /* RUNS BUT ONLY READS FIRST ROW */
 
@@ -149,7 +151,7 @@ smle own pop , groupid(region) replace rhotype(interval) noexecute /* RUNS BUT O
 /* No restrictions on gamma, but when gamma = 0, the Fortran program makes it 0.001 to avoid divide-by-zero errors */
 smle own pop , peeravg(peeravg) npeers(npeers) replace fixgamma gamma(0) `execute'
 est store gamma0
-smle own pop , groupid(region) replace fixgamma gamma(0) `execute'
+smle own pop , groupid(region) replace fixgamma gamma(0) noexecute
 est store ggamma0
 
 /* Set equilibrium type */
@@ -161,24 +163,24 @@ smle own pop , groupid(region) replace equilibrium(low) noexecute
 /* equilibrium(high) assumes high equilibrium is selected */
 smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(high) `execute' 
 estimates store high
-smle own pop , groupid(region) replace equilibrium(high) `execute' 
+smle own pop , groupid(region) replace equilibrium(high) noexecute
 estimates store ghigh
 /* equilibrium(random) randomly selects an equilibrium */
 smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(random) `execute'
 estimates store random
-smle own pop , groupid(region) replace equilibrium(random) `execute'
+smle own pop , groupid(region) replace equilibrium(random) noexecute
 estimates store grandom
 /* Options bounds, minimum and plot are not yet supported with execution */
-rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(bounds) execute"' == 198
-rcof `"noisily smle own pop , groupid(region) replace equilibrium(bounds) execute"' == 198
+rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(bounds)"' == 198
+rcof `"noisily smle own pop , groupid(region) replace equilibrium(bounds)"' == 198
 smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(bounds) noexecute 
 smle own pop , groupid(region) replace equilibrium(bounds) noexecute 
-rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(minimum) execute"' == 198
-rcof `"noisily smle own pop , groupid(region) replace equilibrium(minimum) execute"' == 198
+rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(minimum)"' == 198
+rcof `"noisily smle own pop , groupid(region) replace equilibrium(minimum)"' == 198
 smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(minimum) noexecute 
 smle own pop , groupid(region) replace equilibrium(minimum) noexecute 
-rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(plot) execute"' == 198
-rcof `"noisily smle own pop , groupid(region) replace equilibrium(plot) execute"' == 198
+rcof `"noisily smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(plot)"' == 198
+rcof `"noisily smle own pop , groupid(region) replace equilibrium(plot)"' == 198
 smle own pop , peeravg(peeravg) npeers(npeers) replace equilibrium(plot) noexecute 
 smle own pop , groupid(region) replace equilibrium(plot) noexecute 
 
@@ -197,7 +199,7 @@ smle own pop , groupid(region) replace simulator(ghk) noexecute
 /* hybrid */
 smle own pop , peeravg(peeravg) npeers(npeers) replace simulator(hybrid) `execute'
 estimates store hybrid
-smle own pop , groupid(region) replace simulator(hybrid) `execute'
+smle own pop , groupid(region) replace simulator(hybrid) noexecute
 estimates store ghybrid
 
 /* Set nsim (integer, minimum 1)*/
@@ -205,7 +207,7 @@ rcof "noisily smle own pop , peeravg(peeravg) npeers(npeers) nsim(0)" == 198
 rcof "noisily smle own pop , peeravg(peeravg) npeers(npeers) nsim(2.5)" == 198
 smle own pop , peeravg(peeravg) npeers(npeers) replace nsim(1) `execute'
 estimates store insim_1
-smle own pop , groupid(region) replace nsim(1) `execute'
+smle own pop , groupid(region) replace nsim(1) noexecute
 estimates store gnsim_1
 
 /* Set optimizer */
@@ -217,7 +219,7 @@ smle own pop , groupid(region) replace optimizer(dfp) noexecute
 /* sa is simulated annealing */
 smle own pop , peeravg(peeravg) npeers(npeers) replace optimizer(sa) `execute'
 estimates store sa
-smle own pop , groupid(region) replace optimizer(sa) `execute'
+smle own pop , groupid(region) replace optimizer(sa) noexecute
 estimates store gsa
 
 /* Set restarts (integer, minimum 0) */
